@@ -19,4 +19,11 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\Fonts\" />
+    <Folder Include="Resources\Languages\" />
+    <Folder Include="Resources\Styles\" />
+    <Folder Include="Resources\Themes\" />
+  </ItemGroup>
+
 </Project>

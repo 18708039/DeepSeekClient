@@ -26,6 +26,4 @@
         public string? content { get; set; }
         public string? reasoning_content { get; set; }
     }
-
-#pragma warning restore IDE1006 // 保持和响应大小写一致
 }

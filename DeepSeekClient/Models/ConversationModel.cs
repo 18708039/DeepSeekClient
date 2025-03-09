@@ -2,5 +2,6 @@
 {
     internal class ConversationModel
     {
+        public MessageModel[] Messages { get; set; } = [];
     }
 }

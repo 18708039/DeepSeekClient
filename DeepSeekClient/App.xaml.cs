@@ -1,4 +1,5 @@
-﻿using DeepSeekClient.Views;
+﻿using DeepSeekClient.Core;
+using DeepSeekClient.Views;
 using Prism.Ioc;
 using Prism.Unity;
 using System.Configuration;
@@ -13,11 +14,15 @@ namespace DeepSeekClient;
 public partial class App : PrismApplication
 {
     protected override Window CreateShell()
-{
+    {
         return Container.Resolve<MainWindow>();
-}
+    }
 
     protected override void RegisterTypes(IContainerRegistry containerRegistry)
     {
+        containerRegistry.RegisterSingleton<InitializationCore>();
+        containerRegistry.RegisterSingleton<ConfiguraionCore>();
+        containerRegistry.RegisterSingleton<CharacterCore>();
+        containerRegistry.RegisterSingleton<ConversationCore>();
     }
 }

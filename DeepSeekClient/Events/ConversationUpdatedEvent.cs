@@ -2,7 +2,7 @@
 
 namespace DeepSeekClient.Events
 {
-    internal class CbservContentFrequentlyChangedEvent : PubSubEvent
+    internal class ConversationUpdatedEvent : PubSubEvent
     {
     }
 }

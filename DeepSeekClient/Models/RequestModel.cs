@@ -22,15 +22,4 @@ namespace DeepSeekClient.Models
         public bool? logprobs { get; set; }
         public int? top_logprobs { get; set; }
     }
-
-    internal class MessageModel
-    {
-        public string content { get; set; } = string.Empty;
-        public string role { get; set; } = string.Empty;
-        public string? name { get; set; }
-        public bool? prefix { get; set; }
-        public string? reasoning_content { get; set; }
-    }
-
-#pragma warning disable IDE1006 // 保持和请求大小写一致
 }

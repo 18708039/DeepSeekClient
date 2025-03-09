@@ -4,5 +4,13 @@
              xmlns:local="clr-namespace:DeepSeekClient"
              xmlns:prism="http://prismlibrary.com/">
     <prism:PrismApplication.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Fonts/LocalFonts.xaml" />
+                <ResourceDictionary Source="/Resources/Languages/Strings_zh_CN.xaml" />
+                <ResourceDictionary Source="/Resources/Themes/DarkTheme.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/ButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </prism:PrismApplication.Resources>
 </prism:PrismApplication>

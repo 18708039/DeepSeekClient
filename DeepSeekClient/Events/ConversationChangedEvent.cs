@@ -2,7 +2,7 @@
 
 namespace DeepSeekClient.Events
 {
-    internal class ConversationChangedEvent : PubSubEvent
+    internal class ConversationChangedEvent : PubSubEvent<string>
     {
     }
 }

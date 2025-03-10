@@ -1,12 +1,19 @@
 ﻿using DeepSeekClient.Models;
+using DeepSeekClient.Views;
 using Prism.Ioc;
 using Prism.Mvvm;
+using Prism.Regions;
 using System.Collections.ObjectModel;
 
 namespace DeepSeekClient.ViewModels
 {
     internal class MainWindowViewModel : BindableBase
     {
+        public MainWindowViewModel(IRegionManager regionManager)
+        {
+            regionManager.RegisterViewWithRegion("SideBarRegion", typeof(SideBarView));
+        }
+
         public string CurrentCharater { get; set; } = string.Empty;
 
         public string CurrentLanguage { get; set; } = "zh_CN";
@@ -17,19 +24,19 @@ namespace DeepSeekClient.ViewModels
 
         public ObservableCollection<MessageModel> Conversation { get; set; } = [];
 
-        public void SetLanguage()
+        public static void SetLanguage()
         { }
 
-        public void SetTheme()
+        public static void SetTheme()
         { }
 
-        public void CharacterChangedHandle()
+        public static void CharacterChangedHandle()
         { }
 
-        public void ConversationChangedHandle()
+        public static void ConversationChangedHandle()
         { }
 
-        public void ConversationUpdatedHandle()
+        public static void ConversationUpdatedHandle()
         { }
     }
 }

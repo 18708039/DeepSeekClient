@@ -5,9 +5,9 @@ namespace DeepSeekClient.Views
     /// <summary>
     /// ConfiguraionView.xaml 的交互逻辑
     /// </summary>
-    public partial class ConfiguraionView : UserControl
+    public partial class ConfigurationView : UserControl
     {
-        public ConfiguraionView()
+        public ConfigurationView()
         {
             InitializeComponent();
         }

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Fonts\iconfont.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Prism.Unity" Version="8.1.97" />
   </ItemGroup>
@@ -17,6 +21,10 @@
     <Reference Include="WpfCCLib">
       <HintPath>..\..\MyLibrariesDLL\bin\Debug\net8.0-windows\WpfCCLib.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Fonts\iconfont.ttf" />
   </ItemGroup>
 
 </Project>

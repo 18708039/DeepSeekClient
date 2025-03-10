@@ -21,8 +21,11 @@ public partial class App : PrismApplication
     protected override void RegisterTypes(IContainerRegistry containerRegistry)
     {
         containerRegistry.RegisterSingleton<InitializationCore>();
-        containerRegistry.RegisterSingleton<ConfiguraionCore>();
+        containerRegistry.RegisterSingleton<ConfigurationCore>();
         containerRegistry.RegisterSingleton<CharacterCore>();
         containerRegistry.RegisterSingleton<ConversationCore>();
+
+        containerRegistry.RegisterDialog<ConfigurationView>();
+        containerRegistry.RegisterDialog<CharacterView>();
     }
 }

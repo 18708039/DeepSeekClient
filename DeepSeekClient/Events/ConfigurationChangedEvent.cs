@@ -3,7 +3,7 @@ using Prism.Events;
 
 namespace DeepSeekClient.Events
 {
-    internal class ConversationUpdatedEvent : PubSubEvent<Tuple<MessageModel, string>>
+    internal class ConfigurationChangedEvent : PubSubEvent<ConfigurationModel>
     {
     }
 }

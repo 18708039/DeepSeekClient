@@ -12,12 +12,11 @@ namespace DeepSeekClient.Core
 {
     internal class InitializationCore
     {
-        public const string charFileExt = "_char.json";
-
-        public const string chatFileExt = "_chat.json";
+        public string CharFileExt { get; } = "_char.json";
+        public string ChatFileExt { get; } = "_chat.json";
         public string ConfigFile { get; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.json");
         public string ChatDir { get; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Chats");
-        public static string TimeStamp => DateTime.Now.ToString("g");
-        public static string CharacterId => DateTime.Now.Ticks.ToString("X");
+        public static string TimeStamp { get => DateTime.Now.ToString("g"); }
+        public static string CharacterId { get => DateTime.Now.Ticks.ToString("X"); }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace DeepSeekClient.ViewModels
 {
-    internal class ConfiguraionViewModel : BindableBase
+    internal class ConfigurationViewModel : BindableBase
     {
     }
 }

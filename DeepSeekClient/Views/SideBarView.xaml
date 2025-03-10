@@ -1,13 +1,139 @@
 ﻿<UserControl x:Class="DeepSeekClient.Views.SideBarView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:DeepSeekClient.Views"
              xmlns:prism="http://prismlibrary.com/"
-             prism:ViewModelLocator.AutoWireViewModel="True"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cclib="clr-namespace:WpfCCLib;assembly=WpfCCLib"
+             prism:ViewModelLocator.AutoWireViewModel="True">
+    <UserControl.Resources>
+        <Style x:Key="ListViewStyle" TargetType="ListView">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="MenuButton" TargetType="cclib:IconButton">
+            <Setter Property="Icon" Value="&#xeea5;" />
+            <Setter Property="IconFont" Value="{StaticResource iconfont}" />
+            <Setter Property="IconSize" Value="32" />
+            <Setter Property="TextVisibility" Value="Collapsed" />
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Foreground" Value="RoyalBlue" />
+            <Setter Property="Background" Value="Transparent" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                    <Setter Property="Icon" Value="&#xeea7;" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="FuncButton" TargetType="cclib:IconButton">
+            <Setter Property="IconFont" Value="{StaticResource iconfont}" />
+            <Setter Property="IconSize" Value="32" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="TextVisibility" Value="Visible" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="Foreground" Value="RoyalBlue" />
+            <Setter Property="Background" Value="Transparent" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                    <Setter Property="TextVisibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="MenuTitle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="10" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="RoyalBlue" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsVisible}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
     <Grid>
+        <Border Background="{DynamicResource ForegroundColorA}" Margin="13,13,9,0" CornerRadius="10" Opacity="0.2" />
+        <Border Background="{DynamicResource BackgroundColorB}" Margin="10,10,10,1" CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource MenuTitle}" Text="{StaticResource MainWindowTitle}" />
+                    <cclib:IconButton Style="{StaticResource MenuButton}" Command="{Binding MenuSwitchCommand}" />
+                </StackPanel>
+                <ListView Grid.Row="1" Style="{StaticResource ListViewStyle}" ItemsSource="{Binding RoleCards}" SelectedIndex="{Binding SelectedCardIndex,Mode=TwoWay}">
+                    <!-- 自定义 ListViewItem 样式 -->
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <!-- 默认样式 -->
+                            <Setter Property="Margin" Value="5,2,5,2" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Gray" />
+                            <Setter Property="Padding" Value="3" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListViewItem">
+                                        <Border Name="ItemBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                                Margin="{TemplateBinding Margin}" BorderThickness="2" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <!-- 鼠标悬停时，边框变为蓝色 -->
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="RoyalBlue" />
+                                            </Trigger>
+                                            <!-- 选中时，边框加粗并变为深蓝色 -->
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="ItemBorder" Property="BorderBrush" Value="RoyalBlue" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="RoyalBlue">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                        <RowDefinition Height="auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Margin="2,2,8,2" FontSize="16" TextWrapping="NoWrap" Text="{Binding RoleName}" Foreground="RoyalBlue" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" TextTrimming="None" />
+                                        <cclib:IconButton Grid.Column="1" Icon="&#xeea9;" IconFont="{StaticResource iconfont}" IconSize="20" TextVisibility="Collapsed" Foreground="RoyalBlue" Command="{Binding DataContext.RoleOptionCommand,RelativeSource={RelativeSource AncestorType={x:Type ListView}}}" CommandParameter="{Binding RoleId}" />
+                                    </Grid>
+                                    <TextBlock Grid.Row="1" Margin="2" MaxHeight="60" MaxWidth="200" TextWrapping="Wrap" Text="{Binding LastChat}"  Foreground="{DynamicResource ForegroundColorB}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Row="2" Margin="2" Foreground="RoyalBlue" HorizontalAlignment="Right" FontSize="10" Text="{Binding LastStamp}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <cclib:IconButton Grid.Row="2" Style="{StaticResource FuncButton}" Icon="&#xedf3;" Content="{DynamicResource NewChar}" Command="{Binding RoleCreateCommand}" />
+                <cclib:IconButton Grid.Row="3" Style="{StaticResource FuncButton}" Icon="&#xeeb1;" Content="{DynamicResource SetParam}" Command="{Binding ParamSetupCommand}" />
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

@@ -29,7 +29,6 @@ namespace DeepSeekClient.Core
                 Directory.CreateDirectory(_initial.ChatDir);
                 var newChar = new CharacterModel(InitializationCore.CharacterId);
                 CharacterSave(newChar);
-                CharList.Add(newChar);
                 return;
             }
 
@@ -62,14 +61,14 @@ namespace DeepSeekClient.Core
 
         public CharacterModel CharacterLoad(string charId)
         {
-            var charfilePath = Path.Combine(_initial.ChatDir, charId, _initial.CharFileExt);
+            var charfilePath = Path.Combine(_initial.ChatDir, charId + _initial.CharFileExt);
             var jsonString = File.ReadAllText(charfilePath);
             return JsonConvert.DeserializeObject<CharacterModel>(jsonString) ?? new CharacterModel(charId);
         }
 
         public void CharacterSave(CharacterModel newChar)
         {
-            var charfilePath = Path.Combine(_initial.ChatDir, newChar.CharId, _initial.CharFileExt);
+            var charfilePath = Path.Combine(_initial.ChatDir, newChar.CharId + _initial.CharFileExt);
             var chatfilePath = charfilePath.Replace(_initial.CharFileExt, _initial.ChatFileExt);
 
             var jsonString = JsonConvert.SerializeObject(newChar, Formatting.Indented);

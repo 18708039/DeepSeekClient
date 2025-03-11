@@ -5,9 +5,87 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:DeepSeekClient.Views"
              xmlns:prism="http://prismlibrary.com/"
-prism:ViewModelLocator.AutoWireViewModel="True"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-    </Grid>
+             d:DesignHeight="450" d:DesignWidth="450">
+    <prism:Dialog.WindowStyle>
+        <Style TargetType="Window">
+            <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
+            <Setter Property="WindowStyle" Value="None" />
+            <Setter Property="Width" Value="600" />
+            <Setter Property="Height" Value="400" />
+            <Setter Property="ResizeMode" Value="NoResize" />
+        </Style>
+    </prism:Dialog.WindowStyle>
+    <UserControl.Resources>
+        <Style x:Key="LabelStyle1" TargetType="Label">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Foreground" Value="RoyalBlue" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="TextBoxStyle1" TargetType="TextBox">
+            <Setter Property="CaretBrush" Value="{StaticResource ForegroundColorA}" />
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundColorA}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="RoyalBlue" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="5" />
+        </Style>
+        <Style x:Key="FuncButton" TargetType="Button">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Width" Value="150" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="Margin" Value="5,15,5,5" />
+        </Style>
+    </UserControl.Resources>
+    <Border Background="{DynamicResource BackgroundColorB}" CornerRadius="10">
+        <Border.Effect>
+            <DropShadowEffect Color="Gray" BlurRadius="2"  ShadowDepth="2" />
+        </Border.Effect>
+        <Grid Margin="15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Label Grid.ColumnSpan="2" Style="{StaticResource LabelStyle1}" HorizontalAlignment="Left" VerticalAlignment="Center" Content="- Settings -" FontSize="22" />
+
+            <Label Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle1}" Content="{DynamicResource LanguageSet}" />
+            <ComboBox Grid.Row="2" Grid.Column="1" SelectedIndex="{Binding LanguageIndex,Mode=TwoWay}" Margin="5" Padding="5">
+                <ComboBoxItem Content="简体中文" />
+                <ComboBoxItem Content="English" />
+            </ComboBox>
+
+            <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle1}" Content="{DynamicResource ThemeSet}" />
+            <ComboBox Grid.Row="3" Grid.Column="1" SelectedIndex="{Binding ThemeIndex,Mode=TwoWay}" Margin="5" Padding="5">
+                <ComboBoxItem Content="{DynamicResource DarkColor}" />
+                <ComboBoxItem Content="{DynamicResource LightColor}" />
+            </ComboBox>
+
+            <Line Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Stroke="RoyalBlue" StrokeThickness="2" Margin="5,10,5,10" X2="600" />
+
+            <Label Grid.Row="5" Grid.Column="0" Style="{StaticResource LabelStyle1}" Content="API Uri" />
+            <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource TextBoxStyle1}" VerticalContentAlignment="Center" Text="{Binding ApiUri,Mode=TwoWay}" />
+
+            <Label Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelStyle1}" Content="API Key" />
+            <TextBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource TextBoxStyle1}" VerticalContentAlignment="Center" Text="{Binding ApiKey,Mode=TwoWay}" />
+
+            <Button Grid.Row="8" Grid.Column="1" Style="{StaticResource FuncButton}" Content="{DynamicResource CancelOpera}" Command="{Binding CancelCommand}" />
+            <Button Grid.Row="8" Grid.Column="2" Style="{StaticResource FuncButton}" Content="{DynamicResource SaveOpera}" Command="{Binding SaveCommand}" BorderBrush="RoyalBlue" />
+        </Grid>
+    </Border>
 </UserControl>

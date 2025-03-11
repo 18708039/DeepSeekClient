@@ -74,14 +74,14 @@
                                     <ColumnDefinition />
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Name="textBlock1" Margin="5" VerticalAlignment="Top" Grid.Column="0" Text="&#xee00;" FontSize="26" FontFamily="{StaticResource iconfont}" Foreground="RoyalBlue" />
+                                <TextBlock Name="textBlock1" Margin="5" VerticalAlignment="Top" Grid.Column="0" Text="&#xedf3;" FontSize="26" FontFamily="{StaticResource iconfont}" Foreground="RoyalBlue" />
                                 <Grid x:Name="grid1" Grid.Column="1" HorizontalAlignment="Left" Margin="0,15,0,0" VerticalAlignment="Top">
                                     <Border x:Name="border1" Background="RoyalBlue" Opacity="0.2" CornerRadius="10" BorderThickness="0" />
                                     <TextBox x:Name="textBox1" Text="{Binding content}" Padding="10"  TextWrapping="Wrap"
                                     Foreground="{DynamicResource ForegroundColorB}" Background="Transparent" IsReadOnly="True"
                                     BorderThickness="0" MinWidth="80" FontSize="14" />
                                 </Grid>
-                                <TextBlock Name="textBlock2" Margin="5" VerticalAlignment="Top" Grid.Column="2" Text="&#xef6a;" FontSize="26" FontFamily="{StaticResource iconfont}" Foreground="Gray" />
+                                <TextBlock Name="textBlock2" Margin="5" VerticalAlignment="Top" Grid.Column="2" Text="&#xee00;" FontSize="26" FontFamily="{StaticResource iconfont}" Foreground="Gray" />
                             </Grid>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding content}" Value="">
@@ -124,7 +124,11 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <Border Grid.Row="2" MaxWidth="802" MaxHeight="402" Margin="5,5,1,0" CornerRadius="10" Background="RoyalBlue" Opacity="0.2" />
+                <Border Grid.Row="2" MaxWidth="802" MaxHeight="402" Margin="5,5,1,0" CornerRadius="10" Background="RoyalBlue" Opacity="0.2">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Gray" BlurRadius="2"  ShadowDepth="2" />
+                    </Border.Effect>
+                </Border>
                 <Border Grid.Row="2" MaxWidth="800" MaxHeight="400" Margin="3" CornerRadius="10" Background="Transparent" BorderBrush="RoyalBlue" BorderThickness="2">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -141,7 +145,7 @@
                             </TextBox.InputBindings>
                         </TextBox>
                         <Button Grid.Column="1" Grid.RowSpan="2" Style="{StaticResource SendButton}" Command="{Binding SendMessageAsyncCommand}" Tag="{Binding SendTag}" />
-                        <cclib:IconToggleButton Grid.Row="1" Margin="10,5,10,10" Width="110" BorderBrush="RoyalBlue" BorderThickness="1" HorizontalAlignment="Left" VerticalAlignment="Center" Icon="&#xef01;" IconFont="{StaticResource iconfont}" Padding="5" IconSize="17" FontSize="12" Content="{DynamicResource DeepSeekR1}" Foreground="DimGray" Background="Gray" CheckedForeColor="{StaticResource ForegroundColorA}" CheckedColor="RoyalBlue" IsChecked="{Binding IsR1Checked,Mode=TwoWay}" />
+                        <cclib:IconToggleButton Grid.Row="1" Margin="10,5,10,10" Width="110" BorderBrush="RoyalBlue" BorderThickness="1" HorizontalAlignment="Left" VerticalAlignment="Center" Icon="&#xef6a;" IconFont="{StaticResource iconfont}" Padding="5" IconSize="17" FontSize="12" Content="{DynamicResource DeepSeekR1}" Foreground="DimGray" Background="Gray" CheckedForeColor="{StaticResource ForegroundColorA}" CheckedColor="RoyalBlue" IsChecked="{Binding IsR1Checked,Mode=TwoWay}" />
                     </Grid>
                 </Border>
             </Grid>

@@ -63,8 +63,10 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <Border Background="{DynamicResource ForegroundColorA}" Margin="13,13,9,0" CornerRadius="10" Opacity="0.2" />
         <Border Background="{DynamicResource BackgroundColorB}" Margin="10,10,10,1" CornerRadius="10">
+            <Border.Effect>
+                <DropShadowEffect Color="Gray" BlurRadius="2"  ShadowDepth="2" />
+            </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
@@ -131,7 +133,7 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <cclib:IconButton Grid.Row="2" Style="{StaticResource FuncButton}" Icon="&#xedf3;" Content="{DynamicResource NewChar}" Command="{Binding RoleCreateCommand}" />
+                <cclib:IconButton Grid.Row="2" Style="{StaticResource FuncButton}" Icon="&#xef01;" Content="{DynamicResource NewChar}" Command="{Binding RoleCreateCommand}" />
                 <cclib:IconButton Grid.Row="3" Style="{StaticResource FuncButton}" Icon="&#xeeb1;" Content="{DynamicResource SetParam}" Command="{Binding ParamSetupCommand}" />
             </Grid>
         </Border>

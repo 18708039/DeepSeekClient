@@ -6,5 +6,18 @@
     <sys:String x:Key="ClearChat">清空对话</sys:String>
     <sys:String x:Key="DeepSeekR1">深度推理(R1)</sys:String>
     <sys:String x:Key="NewChar">角色创建</sys:String>
-    <sys:String x:Key="SetParam">参数设定</sys:String>
+    <sys:String x:Key="SetParam">参数设置</sys:String>
+    <sys:String x:Key="LanguageSet">语言设定</sys:String>
+    <sys:String x:Key="ThemeSet">主题设定</sys:String>
+    <sys:String x:Key="DarkColor">深色</sys:String>
+    <sys:String x:Key="LightColor">浅色</sys:String>
+    <sys:String x:Key="SaveOpera">保存</sys:String>
+    <sys:String x:Key="CancelOpera">取消</sys:String>
+    <sys:String x:Key="CharName">角色名称</sys:String>
+    <sys:String x:Key="TempratureSet">角色温度</sys:String>
+    <sys:String x:Key="ThinkRigorous">严谨</sys:String>
+    <sys:String x:Key="ThinkCreative">创意</sys:String>
+    <sys:String x:Key="CharSetup">角色描述</sys:String>
+    <sys:String x:Key="DeleteChar">删除角色</sys:String>
+    <sys:String x:Key="CustomSet">独立Api</sys:String>
 </ResourceDictionary>

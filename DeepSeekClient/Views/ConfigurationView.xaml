@@ -12,6 +12,8 @@
         <Style TargetType="Window">
             <Setter Property="prism:Dialog.WindowStartupLocation" Value="CenterOwner" />
             <Setter Property="WindowStyle" Value="None" />
+            <Setter Property="AllowsTransparency" Value="True" />
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="Width" Value="600" />
             <Setter Property="Height" Value="400" />
             <Setter Property="ResizeMode" Value="NoResize" />
@@ -19,6 +21,7 @@
     </prism:Dialog.WindowStyle>
     <UserControl.Resources>
         <Style x:Key="LabelStyle1" TargetType="Label">
+            <Setter Property="Margin" Value="0,2" />
             <Setter Property="FontSize" Value="16" />
             <Setter Property="Foreground" Value="RoyalBlue" />
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -41,9 +44,9 @@
             <Setter Property="Margin" Value="5,15,5,5" />
         </Style>
     </UserControl.Resources>
-    <Border Background="{DynamicResource BackgroundColorB}" CornerRadius="10">
+    <Border Background="{DynamicResource BackgroundColorB}" CornerRadius="10" Margin="1">
         <Border.Effect>
-            <DropShadowEffect Color="Gray" BlurRadius="2"  ShadowDepth="2" />
+            <DropShadowEffect Color="Gray" ShadowDepth="2" />
         </Border.Effect>
         <Grid Margin="15">
             <Grid.ColumnDefinitions>

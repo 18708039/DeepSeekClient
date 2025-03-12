@@ -6,6 +6,7 @@
              prism:ViewModelLocator.AutoWireViewModel="True">
     <UserControl.Resources>
         <Style x:Key="ListViewStyle" TargetType="ListView">
+            <Setter Property="Width" Value="200" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
@@ -65,7 +66,7 @@
     <Grid>
         <Border Background="{DynamicResource BackgroundColorB}" Margin="10,10,10,1" CornerRadius="10">
             <Border.Effect>
-                <DropShadowEffect Color="Gray" BlurRadius="2"  ShadowDepth="2" />
+                <DropShadowEffect Color="Gray" ShadowDepth="2" />
             </Border.Effect>
             <Grid>
                 <Grid.RowDefinitions>
@@ -78,7 +79,7 @@
                     <TextBlock Style="{StaticResource MenuTitle}" Text="{StaticResource MainWindowTitle}" />
                     <cclib:IconButton Style="{StaticResource MenuButton}" Command="{Binding MenuSwitchCommand}" />
                 </StackPanel>
-                <ListView Grid.Row="1" Style="{StaticResource ListViewStyle}" ItemsSource="{Binding RoleCards}" SelectedIndex="{Binding SelectedCardIndex,Mode=TwoWay}">
+                <ListView Grid.Row="1" Style="{StaticResource ListViewStyle}" ItemsSource="{Binding Characters}" SelectedIndex="{Binding CurrentCharIndex,Mode=TwoWay}">
                     <!-- 自定义 ListViewItem 样式 -->
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -123,18 +124,18 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Margin="2,2,8,2" FontSize="16" TextWrapping="NoWrap" Text="{Binding RoleName}" Foreground="RoyalBlue" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" TextTrimming="None" />
-                                        <cclib:IconButton Grid.Column="1" Icon="&#xeea9;" IconFont="{StaticResource iconfont}" IconSize="20" TextVisibility="Collapsed" Foreground="RoyalBlue" Command="{Binding DataContext.RoleOptionCommand,RelativeSource={RelativeSource AncestorType={x:Type ListView}}}" CommandParameter="{Binding RoleId}" />
+                                        <TextBlock Margin="2,2,8,2" FontSize="16" TextWrapping="NoWrap" Text="{Binding CharName}" Foreground="RoyalBlue" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" TextTrimming="CharacterEllipsis" />
+                                        <cclib:IconButton Grid.Column="1" Icon="&#xeea9;" IconFont="{StaticResource iconfont}" IconSize="20" TextVisibility="Collapsed" Foreground="RoyalBlue" Command="{Binding DataContext.CardOptionCommand,RelativeSource={RelativeSource AncestorType={x:Type ListView}}}" CommandParameter="{Binding CharId}" />
                                     </Grid>
-                                    <TextBlock Grid.Row="1" Margin="2" MaxHeight="60" MaxWidth="200" TextWrapping="Wrap" Text="{Binding LastChat}"  Foreground="{DynamicResource ForegroundColorB}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Row="1" Margin="2" MaxHeight="60" TextWrapping="Wrap" Text="{Binding LastQuestion}"  Foreground="{DynamicResource ForegroundColorB}" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Grid.Row="2" Margin="2" Foreground="RoyalBlue" HorizontalAlignment="Right" FontSize="10" Text="{Binding LastStamp}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <cclib:IconButton Grid.Row="2" Style="{StaticResource FuncButton}" Icon="&#xef01;" Content="{DynamicResource NewChar}" Command="{Binding RoleCreateCommand}" />
-                <cclib:IconButton Grid.Row="3" Style="{StaticResource FuncButton}" Icon="&#xeeb1;" Content="{DynamicResource SetParam}" Command="{Binding ParamSetupCommand}" />
+                <cclib:IconButton Grid.Row="2" Style="{StaticResource FuncButton}" Icon="&#xef01;" Content="{DynamicResource NewChar}" Command="{Binding NewCharCommand}" />
+                <cclib:IconButton Grid.Row="3" Style="{StaticResource FuncButton}" Icon="&#xeeb1;" Content="{DynamicResource SetParam}" Command="{Binding SetParamCommand}" />
             </Grid>
         </Border>
     </Grid>

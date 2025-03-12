@@ -124,11 +124,7 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-                <Border Grid.Row="2" MaxWidth="802" MaxHeight="402" Margin="5,5,1,0" CornerRadius="10" Background="RoyalBlue" Opacity="0.2">
-                    <Border.Effect>
-                        <DropShadowEffect Color="Gray" BlurRadius="2"  ShadowDepth="2" />
-                    </Border.Effect>
-                </Border>
+                <Border Grid.Row="2" MaxWidth="802" MaxHeight="402" Margin="5,5,1,0" CornerRadius="10" Background="RoyalBlue" Opacity="0.2" />
                 <Border Grid.Row="2" MaxWidth="800" MaxHeight="400" Margin="3" CornerRadius="10" Background="Transparent" BorderBrush="RoyalBlue" BorderThickness="2">
                     <Grid>
                         <Grid.RowDefinitions>

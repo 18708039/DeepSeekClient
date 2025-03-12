@@ -12,10 +12,9 @@ namespace DeepSeekClient.Core
         private readonly InitializationCore _initial;
         public List<CharacterModel> CharList { get; private set; }
 
-        public CharacterCore(InitializationCore initializationCore, IEventAggregator eventAggregator)
+        public CharacterCore(InitializationCore initializationCore)
         {
             _initial = initializationCore;
-            eventAggregator.GetEvent<CharacterChangedEvent>().Subscribe(CharChangedHandle, ThreadOption.BackgroundThread);
 
             CharList = [];
 
@@ -24,23 +23,23 @@ namespace DeepSeekClient.Core
 
         public void CharacterListLoad()
         {
+            CharList.Clear();
+
             if (!Directory.Exists(_initial.ChatDir))
             {
                 Directory.CreateDirectory(_initial.ChatDir);
-                var newChar = new CharacterModel(InitializationCore.CharacterId);
-                CharacterSave(newChar);
+                CharacterSave(new CharacterModel(_initial.CharacterId) { CharName = "default" });
                 return;
             }
 
             DirectoryInfo directory = new(_initial.ChatDir);
-            FileInfo[] files = [.. directory.GetFiles("*" + _initial.ChatFileExt).OrderByDescending(f => f.LastWriteTime)];
+            FileInfo[] files = [.. directory.GetFiles("*" + _initial.CharFileExt)];
 
             foreach (var file in files)
             {
-                var chatfilePath = file.FullName;
-                var charfilePath = chatfilePath.Replace(_initial.ChatFileExt, _initial.CharFileExt);
-
+                var charfilePath = file.FullName;
                 var jsonString = File.ReadAllText(charfilePath);
+
                 var character = JsonConvert.DeserializeObject<CharacterModel>(jsonString);
 
                 if (string.IsNullOrEmpty(character?.CharId))
@@ -53,9 +52,13 @@ namespace DeepSeekClient.Core
 
             if (CharList.Count == 0)
             {
-                var newChar = new CharacterModel(InitializationCore.CharacterId);
-                CharacterSave(newChar);
-                CharList.Add(newChar);
+                CharacterSave(new CharacterModel(_initial.CharacterId) { CharName = "default" });
+                return;
+            }
+
+            if (CharList.Count > 1)
+            {
+                CharList = [.. CharList.OrderByDescending(c => c.LastStamp)];
             }
         }
 
@@ -63,28 +66,45 @@ namespace DeepSeekClient.Core
         {
             var charfilePath = Path.Combine(_initial.ChatDir, charId + _initial.CharFileExt);
             var jsonString = File.ReadAllText(charfilePath);
-            return JsonConvert.DeserializeObject<CharacterModel>(jsonString) ?? new CharacterModel(charId);
+            return JsonConvert.DeserializeObject<CharacterModel>(jsonString) ?? throw new Exception(charfilePath + " loading err.");
+        }
+
+        public CharacterModel CharacterLoad()
+        {
+            return new CharacterModel(_initial.CharacterId);
         }
 
         public void CharacterSave(CharacterModel newChar)
         {
             var charfilePath = Path.Combine(_initial.ChatDir, newChar.CharId + _initial.CharFileExt);
-            var chatfilePath = charfilePath.Replace(_initial.CharFileExt, _initial.ChatFileExt);
 
             var jsonString = JsonConvert.SerializeObject(newChar, Formatting.Indented);
 
             File.WriteAllText(charfilePath, jsonString);
 
-            if (!File.Exists(chatfilePath))
+            int charIndex = CharList.FindIndex(c => c.CharId == newChar.CharId);
+
+            if (charIndex >= 0)
             {
-                File.WriteAllText(chatfilePath, "[]");
+                CharList[charIndex] = newChar;
+            }
+            else
+            {
                 CharList.Insert(0, newChar);
             }
         }
 
-        public void CharChangedHandle(CharacterModel newChar)
+        public void CharacterRemove(string charId)
         {
-            CharacterSave(newChar);
+            var charfilePath = Path.Combine(_initial.ChatDir, charId + _initial.CharFileExt);
+
+            if (File.Exists(charfilePath)) { File.Delete(charfilePath); }
+
+            int charIndex = CharList.FindIndex(c => c.CharId == charId);
+
+            if (charIndex >= 0) { CharList.RemoveAt(charIndex); }
+
+            if (CharList.Count == 0) { CharacterListLoad(); }
         }
     }
 }

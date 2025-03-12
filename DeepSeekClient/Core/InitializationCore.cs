@@ -16,7 +16,7 @@ namespace DeepSeekClient.Core
         public string ChatFileExt { get; } = "_chat.json";
         public string ConfigFile { get; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Config.json");
         public string ChatDir { get; } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Chats");
-        public static string TimeStamp { get => DateTime.Now.ToString("g"); }
-        public static string CharacterId { get => DateTime.Now.Ticks.ToString("X"); }
+        public string TimeStamp { get => DateTime.Now.ToString("g"); }
+        public string CharacterId { get => DateTime.Now.Ticks.ToString("X"); }
     }
 }

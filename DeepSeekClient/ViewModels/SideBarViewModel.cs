@@ -1,10 +1,12 @@
 ﻿using DeepSeekClient.Core;
+using DeepSeekClient.Events;
 using DeepSeekClient.Models;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
+using System;
 using System.Collections.ObjectModel;
 
 namespace DeepSeekClient.ViewModels
@@ -12,7 +14,6 @@ namespace DeepSeekClient.ViewModels
     internal class SideBarViewModel : BindableBase
     {
         private readonly IDialogService _dialog;
-        private readonly IEventAggregator _event;
         private readonly CharacterCore _charCore;
 
         private bool _isVisible;
@@ -22,7 +23,6 @@ namespace DeepSeekClient.ViewModels
         public SideBarViewModel(IDialogService dialogService, IEventAggregator eventAggregator, CharacterCore characterCore)
         {
             _dialog = dialogService;
-            _event = eventAggregator;
             _charCore = characterCore;
 
             MenuSwitchCommand = new DelegateCommand(MenuSwitch);
@@ -35,21 +35,77 @@ namespace DeepSeekClient.ViewModels
 
             _isVisible = true;
             _currentCharIndex = 0;
+
+            eventAggregator.GetEvent<CharacterChangedEvent>().Subscribe(CharacterChangedHandle);
         }
 
-        private void CardOption(string CharId)
+        private void CharacterChangedHandle(CharacterModel newChar)
         {
-            throw new NotImplementedException();
+            var targetIndex = _characters.ToList().FindIndex(c => c.CharId == newChar.CharId);
+
+            if (targetIndex >= 0)
+            {
+                Characters.RemoveAt(targetIndex);
+                Characters.Insert(0, newChar);
+            }
+            else
+            {
+                Characters.Insert(0, newChar);
+            }
+
+            CurrentCharIndex = 0;
+        }
+
+        private void CardOption(string charId)
+        {
+            var parameters = new DialogParameters
+            {
+                {"Data",charId }
+            };
+
+            _dialog.ShowDialog("CharacterView", parameters, result =>
+            {
+                if (result.Result == ButtonResult.OK)
+                {
+                    var tmpIndex = _currentCharIndex;
+                    _characters.Clear();
+                    Characters.AddRange(_charCore.CharList);
+                    CurrentCharIndex = tmpIndex;
+                }
+
+                if (result.Result == ButtonResult.Abort)
+                {
+                    var charIndex = _characters.ToList().FindIndex(c => c.CharId == charId);
+                    var tmpIndex = _currentCharIndex;
+
+                    if (charIndex >= 0)
+                    {
+                        _characters.Clear();
+                        Characters.AddRange(_charCore.CharList);
+                        if (charIndex == tmpIndex) { CurrentCharIndex = 0; }
+                        else if (charIndex > tmpIndex) { CurrentCharIndex = tmpIndex; }
+                        else { CurrentCharIndex = tmpIndex - 1; }
+                    }
+                }
+            });
         }
 
         private void SetParamDialog()
         {
-            throw new NotImplementedException();
+            _dialog.ShowDialog("ConfigurationView");
         }
 
         private void NewCharDialog()
         {
-            throw new NotImplementedException();
+            _dialog.ShowDialog("CharacterView", result =>
+            {
+                if (result.Result == ButtonResult.OK)
+                {
+                    _characters.Clear();
+                    Characters.AddRange(_charCore.CharList);
+                    CurrentCharIndex = 0;
+                }
+            });
         }
 
         private void MenuSwitch()

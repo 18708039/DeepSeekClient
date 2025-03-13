@@ -7,8 +7,7 @@ namespace DeepSeekClient.Core
     internal class ConversationCore
     {
         private readonly InitializationCore _initial;
-        private JsonSerializerSettings _jsonSettings;
-        public ConversationModel Conversation { get; private set; }
+        private readonly JsonSerializerSettings _jsonSettings;
 
         public ConversationCore(InitializationCore initializationCore)
         {
@@ -18,14 +17,14 @@ namespace DeepSeekClient.Core
             {
                 NullValueHandling = NullValueHandling.Ignore,
             };
-
-            Conversation = new ConversationModel();
         }
 
-        public void ConversationLoad(string charId)
+        public ConversationModel ConversationLoad(string charId)
         {
+            ConversationSave(charId);
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
-            Conversation = JsonConvert.DeserializeObject<ConversationModel>(chatfilePath) ?? new ConversationModel();
+            var jsonString = File.ReadAllText(chatfilePath);
+            return JsonConvert.DeserializeObject<ConversationModel>(jsonString) ?? new ConversationModel();
         }
 
         public void ConversationSave(ConversationModel newConversation, string charId)
@@ -38,13 +37,18 @@ namespace DeepSeekClient.Core
         public void ConversationSave(string charId)
         {
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
-            if (!File.Exists(chatfilePath)) { File.WriteAllText(chatfilePath, "[]"); }
+
+            if (!File.Exists(chatfilePath))
+            {
+                var jsonString = JsonConvert.SerializeObject(new ConversationModel(), Formatting.Indented, _jsonSettings);
+                File.WriteAllText(chatfilePath, jsonString);
+            }
         }
 
         public void ConversactionClear(string charId)
         {
-            var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
-            File.WriteAllText(chatfilePath, "[]");
+            ConversactionRemove(charId);
+            ConversationSave(charId);
         }
 
         public void ConversactionRemove(string charId)

@@ -14,6 +14,7 @@ namespace DeepSeekClient.ViewModels
     internal class SideBarViewModel : BindableBase
     {
         private readonly IDialogService _dialog;
+        private readonly IEventAggregator _event;
         private readonly CharacterCore _charCore;
 
         private bool _isVisible;
@@ -24,6 +25,7 @@ namespace DeepSeekClient.ViewModels
         {
             _dialog = dialogService;
             _charCore = characterCore;
+            _event = eventAggregator;
 
             MenuSwitchCommand = new DelegateCommand(MenuSwitch);
             NewCharCommand = new DelegateCommand(NewCharDialog);
@@ -36,7 +38,7 @@ namespace DeepSeekClient.ViewModels
             _isVisible = true;
             _currentCharIndex = 0;
 
-            eventAggregator.GetEvent<CharacterChangedEvent>().Subscribe(CharacterChangedHandle);
+            _event.GetEvent<CharacterChangedEvent>().Subscribe(CharacterChangedHandle);
         }
 
         private void CharacterChangedHandle(CharacterModel newChar)
@@ -122,7 +124,14 @@ namespace DeepSeekClient.ViewModels
         public int CurrentCharIndex
         {
             get { return _currentCharIndex; }
-            set { SetProperty(ref _currentCharIndex, value); }
+            set
+            {
+                if (SetProperty(ref _currentCharIndex, value) && value >= 0)
+                {
+                    var charId = _characters[_currentCharIndex].CharId;
+                    _event.GetEvent<ConversationChangedEvent>().Publish(charId);
+                }
+            }
         }
 
         public ObservableCollection<CharacterModel> Characters

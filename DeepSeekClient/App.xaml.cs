@@ -1,4 +1,5 @@
 ﻿using DeepSeekClient.Core;
+using DeepSeekClient.Services;
 using DeepSeekClient.Views;
 using Prism.Ioc;
 using Prism.Unity;
@@ -24,6 +25,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ConfigurationCore>();
         containerRegistry.RegisterSingleton<CharacterCore>();
         containerRegistry.RegisterSingleton<ConversationCore>();
+        containerRegistry.Register<IService, DeepSeekService>();
 
         containerRegistry.RegisterDialog<ConfigurationView>();
         containerRegistry.RegisterDialog<CharacterView>();

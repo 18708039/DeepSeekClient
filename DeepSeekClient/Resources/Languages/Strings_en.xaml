@@ -1,0 +1,23 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <sys:String x:Key="MainWindowTitle">DeepSeekClient</sys:String>
+    <sys:String x:Key="FooterText">AI - generated content.Review closely</sys:String>
+    <sys:String x:Key="ClearChat">Clear Chat</sys:String>
+    <sys:String x:Key="DeepSeekR1">DeepSeek-R1</sys:String>
+    <sys:String x:Key="NewChar">CreateChar.</sys:String>
+    <sys:String x:Key="SetParam">Parameters</sys:String>
+    <sys:String x:Key="LanguageSet">Language</sys:String>
+    <sys:String x:Key="ThemeSet">Theme</sys:String>
+    <sys:String x:Key="DarkColor">Dark</sys:String>
+    <sys:String x:Key="LightColor">Light</sys:String>
+    <sys:String x:Key="SaveOpera">Save</sys:String>
+    <sys:String x:Key="CancelOpera">Cancel</sys:String>
+    <sys:String x:Key="CharName">Char. Name</sys:String>
+    <sys:String x:Key="TempratureSet">Temperature</sys:String>
+    <sys:String x:Key="ThinkRigorous">Rigorous</sys:String>
+    <sys:String x:Key="ThinkCreative">Creative</sys:String>
+    <sys:String x:Key="CharSetup">Char. Prompt</sys:String>
+    <sys:String x:Key="DeleteChar">Delete Char.</sys:String>
+    <sys:String x:Key="CustomSet">Custom API</sys:String>
+</ResourceDictionary>

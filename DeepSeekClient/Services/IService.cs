@@ -1,6 +1,9 @@
-﻿namespace DeepSeekClient.Services
+﻿using DeepSeekClient.Models;
+
+namespace DeepSeekClient.Services
 {
-    internal class IService
+    internal interface IService
     {
+        Task SendRequestAsync(string inputContent, ConfigurationModel configuration, CharacterModel character, CancellationToken cancelToken);
     }
 }

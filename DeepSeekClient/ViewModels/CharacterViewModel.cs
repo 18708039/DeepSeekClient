@@ -51,6 +51,12 @@ namespace DeepSeekClient.ViewModels
 
         private void SaveClose()
         {
+            if (_customApi == true && (string.IsNullOrEmpty(_charUri) || string.IsNullOrEmpty(_charKey)))
+            {
+                MessageBox.Show("Pls fill in the Uri and Key, or disable the Custom API option.", "Check!", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
             _characterModel.CharName = _charName;
             _characterModel.CharTemperature = _charTemperature;
             _characterModel.CharSet = _charSet;

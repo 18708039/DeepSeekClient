@@ -17,7 +17,6 @@ namespace DeepSeekClient.Core
         public ConfigurationCore(InitializationCore initializationCore, IEventAggregator eventAggregator)
         {
             _initial = initializationCore;
-            eventAggregator.GetEvent<ConfigurationChangedEvent>().Subscribe(ConfigChangedHandle, ThreadOption.BackgroundThread);
             Config = new ConfigurationModel();
             ConfigLoad();
         }
@@ -39,12 +38,6 @@ namespace DeepSeekClient.Core
         {
             var jsonString = JsonConvert.SerializeObject(Config, Formatting.Indented);
             File.WriteAllText(_initial.ConfigFile, jsonString);
-        }
-
-        public void ConfigChangedHandle(ConfigurationModel newConfig)
-        {
-            Config = newConfig;
-            ConfigSave();
         }
     }
 }

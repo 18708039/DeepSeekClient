@@ -59,7 +59,11 @@ namespace DeepSeekClient.Services
                 List<MessageModel> messageList = [];
 
                 var parameters = (userMessage, _charId);
-                _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                await Task.Run(() =>
+                {
+                    _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                    _event.GetEvent<CollectionChangedEvent>().Publish();
+                }, cancelToken).ConfigureAwait(false);
 
                 messageList.Add(userMessage);
 
@@ -108,7 +112,6 @@ namespace DeepSeekClient.Services
 
                 using Stream streamContent = await response.Content.ReadAsStreamAsync(cancelToken).ConfigureAwait(false);
                 using StreamReader reader = new(streamContent);
-
                 while (!reader.EndOfStream && !cancelToken.IsCancellationRequested)
                 {
                     var line = await reader.ReadLineAsync(cancelToken).ConfigureAwait(false);
@@ -116,7 +119,6 @@ namespace DeepSeekClient.Services
                     var objString = line.Substring(5).Trim();
                     if (objString.StartsWith("[DONE]")) { break; }
 
-                    Debug.WriteLine(objString);
                     var obj = JsonConvert.DeserializeObject<ResponseModel>(objString);
 
                     MessageModel tempMessage = new()
@@ -129,7 +131,14 @@ namespace DeepSeekClient.Services
                     if (string.IsNullOrEmpty(tempMessage.content) && string.IsNullOrEmpty(tempMessage.reasoning_content)) { continue; }
 
                     parameters = (tempMessage, _charId);
-                    _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                    await Task.Run(() =>
+                    {
+                        _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                    }, cancelToken);
+                    await Task.Run(() =>
+                    {
+                        _event.GetEvent<CollectionChangedEvent>().Publish();
+                    }, cancelToken);
 
                     assistantMessage.content += tempMessage.content;
                     assistantMessage.reasoning_content += tempMessage.reasoning_content;
@@ -141,7 +150,11 @@ namespace DeepSeekClient.Services
                 MessageModel stampMessage = new() { role = "stamp", content = DateTime.Now.ToString("g") };
                 messageList.Add(stampMessage);
                 parameters = (stampMessage, _charId);
-                _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                await Task.Run(() =>
+                {
+                    _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                    _event.GetEvent<CollectionChangedEvent>().Publish();
+                }, cancelToken).ConfigureAwait(false);
 
                 if (cancelToken.IsCancellationRequested)
                 {
@@ -151,12 +164,16 @@ namespace DeepSeekClient.Services
                     messageList.Insert(0, stopMessage);
 
                     parameters = (stopMessage, _charId);
-                    _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                    await Task.Run(() =>
+                    {
+                        _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                        _event.GetEvent<CollectionChangedEvent>().Publish();
+                    }, cancelToken).ConfigureAwait(false);
                 }
 
                 historyMessages.AddRange(messageList);
 
-                _converCore.ConversationSave(new ConversationModel() { Messages = historyMessages }, _charId);
+                await Task.Run(() => _converCore.ConversationSave(new ConversationModel() { Messages = historyMessages }, _charId), cancelToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

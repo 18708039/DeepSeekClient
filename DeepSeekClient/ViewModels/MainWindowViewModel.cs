@@ -3,6 +3,7 @@ using DeepSeekClient.Events;
 using DeepSeekClient.Models;
 using DeepSeekClient.Services;
 using DeepSeekClient.Views;
+using Microsoft.VisualBasic;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Ioc;
@@ -11,6 +12,8 @@ using Prism.Regions;
 using System;
 using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace DeepSeekClient.ViewModels
 {
@@ -46,35 +49,40 @@ namespace DeepSeekClient.ViewModels
             _charCore = containerProvider.Resolve<CharacterCore>();
             _converCore = containerProvider.Resolve<ConversationCore>();
 
+            Initialize();
+            SubscribeToEvents();
+
+            regionManager.RegisterViewWithRegion("SideBarRegion", typeof(SideBarView));
+        }
+
+        private void Initialize()
+        {
             _currentConfig = _configCore.Config;
             _currentChar = _charCore.CharList[0];
-
-            _currentConversation = [];
-            _currentConversation.AddRange(_converCore.ConversationLoad(_currentChar.CharId).Messages);
-
+            _currentConversation = [.. _converCore.ConversationLoad(_currentChar.CharId).Messages];
             _currentCharName = _currentChar.CharName;
             _allowInput = true;
             _isR1Checked = false;
             _inputMessage = string.Empty;
             _stopTag = string.Empty;
-
             _cancelTokenSource = new CancellationTokenSource();
 
             ThemeChangedHandle(_configCore.Config.ConfigTheme);
             LanguageChangedHandle(_configCore.Config.ConfigLanguage);
+        }
 
-            regionManager.RegisterViewWithRegion("SideBarRegion", typeof(SideBarView));
-
+        private void SubscribeToEvents()
+        {
             _event.GetEvent<LanguageChangedEvent>().Subscribe(LanguageChangedHandle);
             _event.GetEvent<ThemeChangedEvent>().Subscribe(ThemeChangedHandle);
-            _event.GetEvent<ConversationChangedEvent>().Subscribe(ConversationChangedHandle);
             _event.GetEvent<ConfigurationChangedEvent>().Subscribe(ConfigurationChangedHandle);
+            _event.GetEvent<ConversationChangedEvent>().Subscribe(ConversationChangedHandle);
             _event.GetEvent<ConversationUpdatedEvent>().Subscribe(ConversationUpdatedHandle, ThreadOption.UIThread, keepSubscriberReferenceAlive: true);
         }
 
-        private void ConfigurationChangedHandle(ConfigurationModel model)
+        private void ConfigurationChangedHandle()
         {
-            _currentConfig = model;
+            _currentConfig = _configCore.Config;
         }
 
         private async Task SendMessageAsync()
@@ -180,6 +188,7 @@ namespace DeepSeekClient.ViewModels
 
             CurrentConversation.Clear();
             CurrentConversation.AddRange(_converCore.ConversationLoad(charId).Messages);
+            _event.GetEvent<CollectionChangedEvent>().Publish();
         }
 
         public bool AllowInput
@@ -220,30 +229,5 @@ namespace DeepSeekClient.ViewModels
 
         public DelegateCommand ClearChatCommand { get; private set; }
         public DelegateCommand SendMessageAsyncCommand { get; private set; }
-
-        public string CurrentCharater { get; set; } = string.Empty;
-
-        public string CurrentLanguage { get; set; } = "zh_CN";
-
-        public string CurrentTheme { get; set; } = "Dark";
-
-        public ObservableCollection<CharacterModel> Characters { get; set; } = [];
-
-        public ObservableCollection<MessageModel> Conversation { get; set; } = [];
-
-        public static void SetLanguage()
-        { }
-
-        public static void SetTheme()
-        { }
-
-        public static void CharacterChangedHandle()
-        { }
-
-        public static void ConversationChangedHandle()
-        { }
-
-        public static void ConversationUpdatedHandle()
-        { }
     }
 }

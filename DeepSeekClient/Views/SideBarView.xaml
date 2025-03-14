@@ -64,7 +64,7 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <Border Background="{DynamicResource BackgroundColorB}" Margin="10,10,10,1" CornerRadius="10">
+        <Border Background="{DynamicResource BackgroundColorB}" Margin="10,10,1,1" CornerRadius="10">
             <Border.Effect>
                 <DropShadowEffect Color="Gray" ShadowDepth="2" />
             </Border.Effect>

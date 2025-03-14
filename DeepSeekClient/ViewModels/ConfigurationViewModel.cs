@@ -56,6 +56,7 @@ namespace DeepSeekClient.ViewModels
             _configCore.Config.ConfigKey = _apiKey;
 
             _configCore.ConfigSave();
+            _event.GetEvent<ConfigurationChangedEvent>().Publish();
 
             RequestClose?.Invoke(new DialogResult(ButtonResult.OK));
         }

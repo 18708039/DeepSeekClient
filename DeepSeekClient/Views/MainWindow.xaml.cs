@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using DeepSeekClient.Events;
+using Prism.Events;
+using System.Collections.Specialized;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,8 +19,20 @@ namespace DeepSeekClient.Views;
 /// </summary>
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    public MainWindow(IEventAggregator eventAggregator)
     {
         InitializeComponent();
+
+        eventAggregator.GetEvent<CollectionChangedEvent>().Subscribe(ScrollToBottom, ThreadOption.UIThread);
+        ScrollToBottom();
+    }
+
+    private void ScrollToBottom()
+    {
+        if (myListView.Items.Count > 0)
+        {
+            var lastItem = myListView.Items[myListView.Items.Count - 1];
+            myListView.ScrollIntoView(lastItem);
+        }
     }
 }

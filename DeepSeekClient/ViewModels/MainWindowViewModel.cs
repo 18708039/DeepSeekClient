@@ -26,8 +26,7 @@ namespace DeepSeekClient.ViewModels
         private ConfigurationModel _currentConfig;
         private CharacterModel _currentChar;
         private ObservableCollection<MessageModel> _currentConversation;
-        private CancellationTokenSource? _cancelTokenSource;
-        private SubscriptionToken? _subscribeToken;
+        private CancellationTokenSource _cancelTokenSource;
 
         private string _currentCharName;
         private bool _allowInput;
@@ -59,6 +58,8 @@ namespace DeepSeekClient.ViewModels
             _inputMessage = string.Empty;
             _stopTag = string.Empty;
 
+            _cancelTokenSource = new CancellationTokenSource();
+
             ThemeChangedHandle(_configCore.Config.ConfigTheme);
             LanguageChangedHandle(_configCore.Config.ConfigLanguage);
 
@@ -68,6 +69,7 @@ namespace DeepSeekClient.ViewModels
             _event.GetEvent<ThemeChangedEvent>().Subscribe(ThemeChangedHandle);
             _event.GetEvent<ConversationChangedEvent>().Subscribe(ConversationChangedHandle);
             _event.GetEvent<ConfigurationChangedEvent>().Subscribe(ConfigurationChangedHandle);
+            _event.GetEvent<ConversationUpdatedEvent>().Subscribe(ConversationUpdatedHandle, ThreadOption.UIThread, keepSubscriberReferenceAlive: true);
         }
 
         private void ConfigurationChangedHandle(ConfigurationModel model)
@@ -81,7 +83,7 @@ namespace DeepSeekClient.ViewModels
             {
                 if (_stopTag == "Stop")
                 {
-                    _cancelTokenSource?.Cancel();
+                    _cancelTokenSource.Cancel();
                     return;
                 }
 
@@ -96,15 +98,13 @@ namespace DeepSeekClient.ViewModels
                     return;
                 }
 
-                _cancelTokenSource = new CancellationTokenSource();
-
                 AllowInput = false;
                 StopTag = "Stop";
 
-                if (_isR1Checked) { _currentChar.CharModel = "deepseek-reasoner"; }
-                _subscribeToken = _event.GetEvent<ConversationUpdatedEvent>().Subscribe(ConversationUpdatedHandle, ThreadOption.UIThread, keepSubscriberReferenceAlive: true);
+                if (_isR1Checked) { _currentChar.CharModel = "deepseek-reasoner"; } else { _currentChar.CharModel = "deepseek-chat"; }
 
                 await _apiService.SendRequestAsync(_inputMessage, _currentConfig, _currentChar, _cancelTokenSource.Token).ConfigureAwait(false);
+
                 InputMessage = string.Empty;
             }
             catch (Exception ex)
@@ -115,7 +115,9 @@ namespace DeepSeekClient.ViewModels
             {
                 StopTag = string.Empty;
                 AllowInput = true;
-                _event.GetEvent<ConversationUpdatedEvent>().Unsubscribe(_subscribeToken);
+
+                _cancelTokenSource.Dispose();
+                _cancelTokenSource = new CancellationTokenSource();
             }
         }
 

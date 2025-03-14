@@ -25,7 +25,7 @@ public partial class App : PrismApplication
         containerRegistry.RegisterSingleton<ConfigurationCore>();
         containerRegistry.RegisterSingleton<CharacterCore>();
         containerRegistry.RegisterSingleton<ConversationCore>();
-        containerRegistry.Register<IService, DeepSeekService>();
+        containerRegistry.RegisterSingleton<IService, DeepSeekService>();
 
         containerRegistry.RegisterDialog<ConfigurationView>();
         containerRegistry.RegisterDialog<CharacterView>();

@@ -74,7 +74,7 @@
             <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal">
                 <TextBox Text="{Binding DisplayTemperature}" Style="{StaticResource TextBoxStyle1}" IsReadOnly="True" />
                 <Label Content="{StaticResource ThinkRigorous}" Margin="40,0,0,0" VerticalAlignment="Center" Foreground="RoyalBlue" />
-                <Slider Width="150" VerticalAlignment="Center" Value="{Binding CharTemperature,Mode=TwoWay}" Minimum="0.0" Maximum="1.5" LargeChange="0.1" SmallChange="0.1" TickFrequency="0.1" IsSnapToTickEnabled="True" />
+                <Slider Width="150" VerticalAlignment="Center" Background="#80808080" Value="{Binding CharTemperature,Mode=TwoWay}" Minimum="0.0" Maximum="1.5" LargeChange="0.1" SmallChange="0.1" TickFrequency="0.1" IsSnapToTickEnabled="True" />
                 <Label Content="{StaticResource ThinkCreative}" VerticalAlignment="Center" Foreground="RoyalBlue" />
             </StackPanel>
 
@@ -85,7 +85,7 @@
             <cclib:IconButton Grid.Row="5" Grid.Column="2" Icon="&#xee8c;" IconFont="{StaticResource iconfont}" Margin="5" IconSize="18" Foreground="Red" Content="{DynamicResource DeleteChar}" Width="100" Command="{Binding DeleteCommand}" />
 
             <Label Grid.Row="6" Grid.Column="0" Style="{StaticResource LabelStyle1}" Content="{DynamicResource CustomSet}" />
-            <cclib:SwitchToggleButton Grid.Row="6" Grid.Column="1" Height="20" Width="35" HorizontalAlignment="Left" Margin="5" Foreground="White" BorderBrush="White" Background="{StaticResource BackgroundColorB}" IsChecked="{Binding CustomApi,Mode=TwoWay}" />
+            <cclib:SwitchToggleButton Grid.Row="6" Grid.Column="1" Height="20" Width="35" HorizontalAlignment="Left" Margin="5" Foreground="White"  BorderBrush="RoyalBlue" CheckedColor="LawnGreen" Background="{DynamicResource ForegroundColorB}" IsChecked="{Binding CustomApi,Mode=TwoWay}" />
 
             <Label Grid.Row="7" Grid.Column="0" Style="{StaticResource LabelStyle1}" Content="API Uri" />
             <TextBox Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Style="{StaticResource TextBoxStyle1}" Text="{Binding CharUri,Mode=TwoWay}" VerticalContentAlignment="Center" IsEnabled="{Binding CustomApi}" />

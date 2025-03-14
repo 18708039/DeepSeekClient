@@ -2,6 +2,6 @@
 {
     internal class ConversationModel
     {
-        public MessageModel[] Messages { get; set; } = [];
+        public List<MessageModel> Messages { get; set; } = [];
     }
 }

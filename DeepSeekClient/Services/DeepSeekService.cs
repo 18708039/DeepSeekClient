@@ -3,6 +3,7 @@ using DeepSeekClient.Events;
 using DeepSeekClient.Models;
 using Newtonsoft.Json;
 using Prism.Events;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Security.Policy;
@@ -11,25 +12,19 @@ using System.Threading;
 
 namespace DeepSeekClient.Services
 {
-    internal class DeepSeekService : IService, IDisposable
+    internal class DeepSeekService : IService
     {
         private readonly IEventAggregator _event;
         private readonly ConversationCore _converCore;
-        private readonly HttpClient _httpClient;
         private readonly JsonSerializerSettings _jsonSettings;
+        private readonly HttpClient _httpClient;
 
         public DeepSeekService(IEventAggregator eventAggregator, ConversationCore conversationCore)
         {
             _event = eventAggregator;
             _converCore = conversationCore;
-            _httpClient = new() { Timeout = TimeSpan.FromSeconds(60) };
             _jsonSettings = new() { NullValueHandling = NullValueHandling.Ignore };
-        }
-
-        public void Dispose()
-        {
-            _httpClient.Dispose();
-            GC.SuppressFinalize(this);
+            _httpClient = new() { Timeout = TimeSpan.FromSeconds(60) };
         }
 
         public async Task SendRequestAsync(string inputContent, ConfigurationModel configuration, CharacterModel character, CancellationToken cancelToken)
@@ -72,15 +67,15 @@ namespace DeepSeekClient.Services
 
                 bool skipStop = false;
 
-                for (int i = historyMessages.Length - 1; i >= 0; i--)
+                for (int i = historyMessages.Count - 1; i >= 0; i--)
                 {
                     if (_contextLimit <= 0) { break; }
                     var msg = historyMessages[i];
                     if (msg.role == "stop") { skipStop = !skipStop; }
                     if (skipStop == true) { continue; }
-
-                    if (msg.role == "assistant") { messageList.Add(msg); }
-                    if (msg.role == "user") { messageList.Add(msg); _contextLimit--; }
+                    if (msg.role != "user" && msg.role != "assistant") { continue; }
+                    messageList.Add(new MessageModel() { role = msg.role, content = msg.content });
+                    if (msg.role == "user") { _contextLimit--; }
                 }
 
                 if (!string.IsNullOrWhiteSpace(_charSet) && requestModel.model == "deepseek-chat")
@@ -117,9 +112,11 @@ namespace DeepSeekClient.Services
                 while (!reader.EndOfStream && !cancelToken.IsCancellationRequested)
                 {
                     var line = await reader.ReadLineAsync(cancelToken).ConfigureAwait(false);
-                    if (string.IsNullOrWhiteSpace(line)) { continue; }
+                    if (string.IsNullOrWhiteSpace(line) || line.StartsWith(": keep-alive")) { continue; }
                     var objString = line.Substring(5).Trim();
-                    if (objString.StartsWith("[Done]")) { break; }
+                    if (objString.StartsWith("[DONE]")) { break; }
+
+                    Debug.WriteLine(objString);
                     var obj = JsonConvert.DeserializeObject<ResponseModel>(objString);
 
                     MessageModel tempMessage = new()
@@ -143,6 +140,8 @@ namespace DeepSeekClient.Services
 
                 MessageModel stampMessage = new() { role = "stamp", content = DateTime.Now.ToString("g") };
                 messageList.Add(stampMessage);
+                parameters = (stampMessage, _charId);
+                _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
 
                 if (cancelToken.IsCancellationRequested)
                 {
@@ -150,15 +149,25 @@ namespace DeepSeekClient.Services
 
                     messageList.Add(stopMessage);
                     messageList.Insert(0, stopMessage);
+
+                    parameters = (stopMessage, _charId);
+                    _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
                 }
+
+                historyMessages.AddRange(messageList);
+
+                _converCore.ConversationSave(new ConversationModel() { Messages = historyMessages }, _charId);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+            finally
+            {
+            }
         }
 
-        private bool IsValidHttpUrl(string uri)
+        private static bool IsValidHttpUrl(string uri)
         {
             return Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult)
                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);

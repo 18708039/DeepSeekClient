@@ -1,5 +1,6 @@
 ﻿using DeepSeekClient.Models;
 using Newtonsoft.Json;
+using System.Diagnostics;
 using System.IO;
 
 namespace DeepSeekClient.Core
@@ -24,6 +25,7 @@ namespace DeepSeekClient.Core
             ConversationSave(charId);
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
             var jsonString = File.ReadAllText(chatfilePath);
+            Debug.WriteLine(jsonString);
             return JsonConvert.DeserializeObject<ConversationModel>(jsonString) ?? new ConversationModel();
         }
 

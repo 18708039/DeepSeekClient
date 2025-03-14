@@ -80,13 +80,13 @@
                                         <RowDefinition Height="auto" />
                                         <RowDefinition />
                                     </Grid.RowDefinitions>
-                                    <TextBox x:Name="textBox1" Text="{Binding reasoning_content}" Padding="10"  TextWrapping="Wrap"
+                                    <TextBox x:Name="textBox1" Text="{Binding reasoning_content}" Padding="10,0"  TextWrapping="Wrap"
                                     Foreground="Gray" Background="Transparent" IsReadOnly="True"
-                                    BorderThickness="0" MinWidth="80" FontSize="14" />
+                                    BorderThickness="0" FontSize="14" />
                                     <Border Grid.Row="1" x:Name="border1" Background="#330000FF" CornerRadius="10" BorderThickness="0">
                                         <TextBox x:Name="textBox2" Text="{Binding content}" Padding="10"  TextWrapping="Wrap"
                                         Foreground="{DynamicResource ForegroundColorB}" Background="Transparent" IsReadOnly="True"
-                                        BorderThickness="0" MinWidth="80" FontSize="14" />
+                                        BorderThickness="0" FontSize="14" />
                                     </Border>
                                 </Grid>
                                 <TextBlock Name="textBlock2" Margin="5" VerticalAlignment="Top" Grid.Column="2" Text="&#xee00;" FontSize="26" FontFamily="{StaticResource iconfont}" Foreground="RoyalBlue" />
@@ -95,31 +95,37 @@
                                 <DataTrigger Binding="{Binding reasoning_content}" Value="">
                                     <Setter TargetName="textBox1" Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding content}" Value="">
+                                    <Setter TargetName="textBox2" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
                                 <DataTrigger Binding="{Binding role}" Value="stop">
+                                    <Setter TargetName="textBox1" Property="Visibility" Value="Collapsed" />
                                     <Setter TargetName="textBlock1" Property="Visibility" Value="Collapsed" />
                                     <Setter TargetName="textBlock2" Property="Foreground" Value="Red" />
                                     <Setter TargetName="grid1" Property="HorizontalAlignment" Value="Right" />
                                     <Setter TargetName="border1" Property="Background" Value="#33FF0000" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding role}" Value="user">
+                                    <Setter TargetName="textBox1" Property="Visibility" Value="Collapsed" />
                                     <Setter TargetName="textBlock1" Property="Visibility" Value="Hidden" />
-                                    <Setter TargetName="textBlock1" Property="Width" Value="80" />
+                                    <Setter TargetName="textBlock1" Property="Width" Value="100" />
                                     <Setter TargetName="grid1" Property="HorizontalAlignment" Value="Right" />
                                     <Setter TargetName="border1" Property="Background" Value="#33808080" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding role}" Value="assistant">
                                     <Setter TargetName="textBlock2" Property="Visibility" Value="Hidden" />
-                                    <Setter TargetName="textBlock2" Property="Width" Value="80" />
+                                    <Setter TargetName="textBlock2" Property="Width" Value="100" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding role}" Value="stamp">
+                                    <Setter TargetName="textBox1" Property="Visibility" Value="Collapsed" />
                                     <Setter TargetName="textBlock1" Property="Visibility" Value="Hidden" />
                                     <Setter TargetName="textBlock2" Property="Visibility" Value="Collapsed" />
                                     <Setter TargetName="grid1" Property="Margin" Value="5,0,0,0" />
                                     <Setter TargetName="border1" Property="Background" Value="Transparent" />
-                                    <Setter TargetName="textBox1" Property="Foreground" Value="RoyalBlue" />
-                                    <Setter TargetName="textBox1" Property="FontSize" Value="10" />
-                                    <Setter TargetName="textBox1" Property="Padding" Value="0" />
-                                    <Setter TargetName="textBox1" Property="Margin" Value="0" />
+                                    <Setter TargetName="textBox2" Property="Foreground" Value="RoyalBlue" />
+                                    <Setter TargetName="textBox2" Property="FontSize" Value="10" />
+                                    <Setter TargetName="textBox2" Property="Padding" Value="0" />
+                                    <Setter TargetName="textBox2" Property="Margin" Value="0" />
                                 </DataTrigger>
                             </DataTemplate.Triggers>
                         </DataTemplate>

@@ -4,6 +4,7 @@ using System.IO;
 using Prism.Events;
 using Newtonsoft.Json;
 using DeepSeekClient.Events;
+using System.Diagnostics;
 
 namespace DeepSeekClient.Core
 {
@@ -30,6 +31,7 @@ namespace DeepSeekClient.Core
             }
 
             var jsonString = File.ReadAllText(_initial.ConfigFile);
+            Debug.WriteLine(jsonString);
             Config = JsonConvert.DeserializeObject<ConfigurationModel>(jsonString) ?? new ConfigurationModel();
         }
 

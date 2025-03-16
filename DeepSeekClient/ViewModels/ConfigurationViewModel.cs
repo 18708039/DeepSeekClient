@@ -25,7 +25,7 @@ namespace DeepSeekClient.ViewModels
         {
             _event = eventAggregator;
             _configCore = configurationCore;
-            _configCore.ConfigLoad();
+            _configCore.ConfigLoadAsync().Await();
 
             _languageSet = _configCore.Config.ConfigLanguage;
             _themeSet = _configCore.Config.ConfigTheme;
@@ -39,10 +39,10 @@ namespace DeepSeekClient.ViewModels
             ThemeIndexConvert();
 
             CancelCommand = new DelegateCommand(CancelClose);
-            SaveCommand = new DelegateCommand(SaveClose);
+            SaveCommand = new DelegateCommand(async () => await SaveClose());
         }
 
-        private void SaveClose()
+        private async Task SaveClose()
         {
             if (string.IsNullOrEmpty(_apiUri) || string.IsNullOrEmpty(_apiKey))
             {
@@ -55,7 +55,7 @@ namespace DeepSeekClient.ViewModels
             _configCore.Config.ConfigUri = _apiUri;
             _configCore.Config.ConfigKey = _apiKey;
 
-            _configCore.ConfigSave();
+            await _configCore.ConfigSaveAsync();
             _event.GetEvent<ConfigurationChangedEvent>().Publish();
 
             RequestClose?.Invoke(new DialogResult(ButtonResult.OK));

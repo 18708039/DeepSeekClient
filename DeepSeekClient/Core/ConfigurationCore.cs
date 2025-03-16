@@ -14,30 +14,29 @@ namespace DeepSeekClient.Core
 
         public ConfigurationModel Config { get; private set; }
 
-        public ConfigurationCore(InitializationCore initializationCore, IEventAggregator eventAggregator)
+        public ConfigurationCore(InitializationCore initializationCore)
         {
             _initial = initializationCore;
             Config = new ConfigurationModel();
-            ConfigLoad();
+            ConfigLoadAsync().Await();
         }
 
-        public void ConfigLoad()
+        public async Task ConfigLoadAsync()
         {
             if (!File.Exists(_initial.ConfigFile))
             {
-                ConfigSave();
+                await ConfigSaveAsync();
                 return;
             }
 
             var jsonString = File.ReadAllText(_initial.ConfigFile);
-            Debug.WriteLine(jsonString);
             Config = JsonConvert.DeserializeObject<ConfigurationModel>(jsonString) ?? new ConfigurationModel();
         }
 
-        public void ConfigSave()
+        public async Task ConfigSaveAsync()
         {
             var jsonString = JsonConvert.SerializeObject(Config, Formatting.Indented);
-            File.WriteAllText(_initial.ConfigFile, jsonString);
+            await File.WriteAllTextAsync(_initial.ConfigFile, jsonString);
         }
     }
 }

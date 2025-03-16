@@ -24,6 +24,7 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         eventAggregator.GetEvent<CollectionChangedEvent>().Subscribe(ScrollToBottom, ThreadOption.UIThread);
+        eventAggregator.GetEvent<DoFocusEvent>().Subscribe(DoFocus, ThreadOption.UIThread);
         ScrollToBottom();
     }
 
@@ -31,8 +32,13 @@ public partial class MainWindow : Window
     {
         if (myListView.Items.Count > 0)
         {
-            var lastItem = myListView.Items[myListView.Items.Count - 1];
+            var lastItem = myListView.Items[^1];
             myListView.ScrollIntoView(lastItem);
         }
+    }
+
+    private void DoFocus()
+    {
+        inputMessageBox.Focus();
     }
 }

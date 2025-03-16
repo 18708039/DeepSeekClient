@@ -41,7 +41,6 @@ namespace DeepSeekClient.Core
                 var charfilePath = file.FullName;
                 var jsonString = File.ReadAllText(charfilePath);
 
-                Debug.WriteLine(jsonString);
                 var character = JsonConvert.DeserializeObject<CharacterModel>(jsonString);
 
                 if (string.IsNullOrEmpty(character?.CharId))
@@ -68,7 +67,6 @@ namespace DeepSeekClient.Core
         {
             var charfilePath = Path.Combine(_initial.ChatDir, charId + _initial.CharFileExt);
             var jsonString = File.ReadAllText(charfilePath);
-            Debug.WriteLine(jsonString);
             return JsonConvert.DeserializeObject<CharacterModel>(jsonString) ?? throw new Exception(charfilePath + " loading err.");
         }
 

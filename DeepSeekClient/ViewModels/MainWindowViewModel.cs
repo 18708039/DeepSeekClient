@@ -11,6 +11,7 @@ using Prism.Mvvm;
 using Prism.Regions;
 using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -39,7 +40,7 @@ namespace DeepSeekClient.ViewModels
 
         public MainWindowViewModel(IRegionManager regionManager, IService apiService, IEventAggregator eventAggregator, IContainerProvider containerProvider)
         {
-            ClearChatCommand = new DelegateCommand(ClearChat);
+            ClearChatCommand = new DelegateCommand(async () => await ClearChatAsync());
             SendMessageAsyncCommand = new DelegateCommand(async () => await SendMessageAsync());
 
             _event = eventAggregator;
@@ -49,17 +50,17 @@ namespace DeepSeekClient.ViewModels
             _charCore = containerProvider.Resolve<CharacterCore>();
             _converCore = containerProvider.Resolve<ConversationCore>();
 
-            Initialize();
+            Initialize().Await();
             SubscribeToEvents();
 
             regionManager.RegisterViewWithRegion("SideBarRegion", typeof(SideBarView));
         }
 
-        private void Initialize()
+        private async Task Initialize()
         {
             _currentConfig = _configCore.Config;
             _currentChar = _charCore.CharList[0];
-            _currentConversation = [.. _converCore.ConversationLoad(_currentChar.CharId).Messages];
+            _currentConversation = [.. await _converCore.ConversationLoad(_currentChar.CharId)];
             _currentCharName = _currentChar.CharName;
             _allowInput = true;
             _isR1Checked = false;
@@ -111,7 +112,7 @@ namespace DeepSeekClient.ViewModels
 
                 if (_isR1Checked) { _currentChar.CharModel = "deepseek-reasoner"; } else { _currentChar.CharModel = "deepseek-chat"; }
 
-                await _apiService.SendRequestAsync(_inputMessage, _currentConfig, _currentChar, _cancelTokenSource.Token).ConfigureAwait(false);
+                await _apiService.SendRequestAsync(_inputMessage, _currentConfig, _currentChar, _cancelTokenSource.Token);
 
                 InputMessage = string.Empty;
             }
@@ -126,12 +127,14 @@ namespace DeepSeekClient.ViewModels
 
                 _cancelTokenSource.Dispose();
                 _cancelTokenSource = new CancellationTokenSource();
+
+                _event.GetEvent<DoFocusEvent>().Publish();
             }
         }
 
-        private void ClearChat()
+        private async Task ClearChatAsync()
         {
-            _converCore.ConversactionClear(_currentChar.CharId);
+            await _converCore.ConversactionClearAsync(_currentChar.CharId);
             CurrentConversation.Clear();
         }
 
@@ -181,13 +184,12 @@ namespace DeepSeekClient.ViewModels
             }
         }
 
-        private void ConversationChangedHandle(string charId)
+        private async void ConversationChangedHandle(string charId)
         {
             _currentChar = _charCore.CharacterLoad(charId);
             CurrentCharName = _currentChar.CharName;
-
-            CurrentConversation.Clear();
-            CurrentConversation.AddRange(_converCore.ConversationLoad(charId).Messages);
+            var messages = await _converCore.ConversationLoad(charId);
+            CurrentConversation = [.. messages];
             _event.GetEvent<CollectionChangedEvent>().Publish();
         }
 

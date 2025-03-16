@@ -130,6 +130,7 @@ namespace DeepSeekClient.ViewModels
                 {
                     var charId = _characters[_currentCharIndex].CharId;
                     _event.GetEvent<ConversationChangedEvent>().Publish(charId);
+                    _event.GetEvent<DoFocusEvent>().Publish();
                 }
             }
         }

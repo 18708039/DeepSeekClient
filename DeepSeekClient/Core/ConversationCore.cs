@@ -20,37 +20,35 @@ namespace DeepSeekClient.Core
             };
         }
 
-        public ConversationModel ConversationLoad(string charId)
+        public async Task<List<MessageModel>> ConversationLoad(string charId)
         {
-            ConversationSave(charId);
+            await ConversationSaveAsync(charId);
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
             var jsonString = File.ReadAllText(chatfilePath);
-            Debug.WriteLine(jsonString);
-            return JsonConvert.DeserializeObject<ConversationModel>(jsonString) ?? new ConversationModel();
+            return JsonConvert.DeserializeObject<List<MessageModel>>(jsonString) ?? [];
         }
 
-        public void ConversationSave(ConversationModel newConversation, string charId)
+        public async Task ConversationSaveAsync(MessageModel[] newConversation, string charId)
         {
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
             var jsonString = JsonConvert.SerializeObject(newConversation, Formatting.Indented, _jsonSettings);
-            File.WriteAllText(chatfilePath, jsonString);
+            await File.WriteAllTextAsync(chatfilePath, jsonString);
         }
 
-        public void ConversationSave(string charId)
+        public async Task ConversationSaveAsync(string charId)
         {
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
 
             if (!File.Exists(chatfilePath))
             {
-                var jsonString = JsonConvert.SerializeObject(new ConversationModel(), Formatting.Indented, _jsonSettings);
-                File.WriteAllText(chatfilePath, jsonString);
+                await File.WriteAllTextAsync(chatfilePath, "[]");
             }
         }
 
-        public void ConversactionClear(string charId)
+        public async Task ConversactionClearAsync(string charId)
         {
             ConversactionRemove(charId);
-            ConversationSave(charId);
+            await ConversationSaveAsync(charId);
         }
 
         public void ConversactionRemove(string charId)

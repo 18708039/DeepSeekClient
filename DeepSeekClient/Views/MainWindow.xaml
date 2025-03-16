@@ -141,7 +141,7 @@
                             <ColumnDefinition />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBox  Margin="10,10,5,5" MinWidth="200" MinHeight="50" MaxHeight="200" TextAlignment="Left" TextWrapping="Wrap" BorderThickness="0" Background="Transparent" AcceptsReturn="True" FontSize="16" CaretBrush="{DynamicResource ForegroundColorA}" Foreground="{DynamicResource ForegroundColorA}" Text="{Binding InputMessage,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding AllowInput}">
+                        <TextBox x:Name="inputMessageBox" Margin="10,10,5,5" MinWidth="200" MinHeight="50" MaxHeight="200" TextAlignment="Left" TextWrapping="Wrap" BorderThickness="0" Background="Transparent" AcceptsReturn="True" FontSize="16" CaretBrush="{DynamicResource ForegroundColorA}" Foreground="{DynamicResource ForegroundColorA}" Text="{Binding InputMessage,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding AllowInput}">
                             <TextBox.InputBindings>
                                 <KeyBinding Key="Return" Command="{Binding SendMessageAsyncCommand}" />
                             </TextBox.InputBindings>

@@ -33,7 +33,7 @@ namespace DeepSeekClient.ViewModels
             _convCore = conversationCore;
 
             CancelCommand = new DelegateCommand(CancelClose);
-            SaveCommand = new DelegateCommand(SaveClose);
+            SaveCommand = new DelegateCommand(async () => await SaveCloseAsync());
             DeleteCommand = new DelegateCommand(DeleteClose);
         }
 
@@ -49,7 +49,7 @@ namespace DeepSeekClient.ViewModels
             }
         }
 
-        private void SaveClose()
+        private async Task SaveCloseAsync()
         {
             if (_customApi == true && (string.IsNullOrEmpty(_charUri) || string.IsNullOrEmpty(_charKey)))
             {
@@ -65,7 +65,7 @@ namespace DeepSeekClient.ViewModels
             _characterModel.CharKey = _charKey;
 
             _charCore.CharacterSave(_characterModel);
-            _convCore.ConversationSave(_charId);
+            await _convCore.ConversationSaveAsync(_charId);
 
             RequestClose?.Invoke(new DialogResult(ButtonResult.OK));
         }

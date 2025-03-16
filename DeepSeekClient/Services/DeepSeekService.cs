@@ -6,6 +6,7 @@ using Prism.Events;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
@@ -29,48 +30,49 @@ namespace DeepSeekClient.Services
 
         public async Task SendRequestAsync(string inputContent, ConfigurationModel configuration, CharacterModel character, CancellationToken cancelToken)
         {
-            try
+            var _uri = configuration.ConfigUri;
+            var _key = configuration.ConfigKey;
+            var _contextLimit = character.CharContextLimit;
+            var _isCustomApi = character.CustomApi;
+            var _charId = character.CharId;
+            var _charSet = character.CharSet;
+
+            RequestModel requestModel = new()
             {
-                var _uri = configuration.ConfigUri;
-                var _key = configuration.ConfigKey;
-                var _contextLimit = character.CharContextLimit;
-                var _isCustomApi = character.CustomApi;
-                var _charId = character.CharId;
-                var _charSet = character.CharSet;
+                model = character.CharModel,
+                temperature = character.CharTemperature,
+                max_tokens = 8000,
+                stream = true // 是否启用流式传输
+            };
 
-                RequestModel requestModel = new()
-                {
-                    model = character.CharModel,
-                    temperature = character.CharTemperature,
-                    max_tokens = 8000,
-                    stream = true // 是否启用流式传输
-                };
+            if (_isCustomApi)
+            {
+                _uri = character.CharUri;
+                _key = character.CharKey;
+            }
 
-                if (_isCustomApi)
-                {
-                    _uri = character.CharUri;
-                    _key = character.CharKey;
-                }
+            if (!IsValidHttpUrl(_uri)) { throw new Exception("Uri is not valid!"); }
 
-                if (!IsValidHttpUrl(_uri)) { throw new Exception("Uri is not valid!"); }
+            MessageModel userMessage = new() { role = "user", content = inputContent };
 
-                MessageModel userMessage = new() { role = "user", content = inputContent };
+            List<MessageModel> messageList = [];
 
-                List<MessageModel> messageList = [];
+            var parameters = (userMessage, _charId);
 
-                var parameters = (userMessage, _charId);
-                await Task.Run(() =>
-                {
-                    _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
-                    _event.GetEvent<CollectionChangedEvent>().Publish();
-                }, cancelToken).ConfigureAwait(false);
+            _ = Task.Run(() =>
+            {
+                _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                _event.GetEvent<CollectionChangedEvent>().Publish();
+            }, cancelToken);
 
-                messageList.Add(userMessage);
+            messageList.Add(userMessage);
 
-                var historyMessages = _converCore.ConversationLoad(_charId).Messages;
+            var historyMessages = await _converCore.ConversationLoad(_charId);
 
-                bool skipStop = false;
+            bool skipStop = false;
 
+            await Task.Run(() =>
+            {
                 for (int i = historyMessages.Count - 1; i >= 0; i--)
                 {
                     if (_contextLimit <= 0) { break; }
@@ -81,42 +83,46 @@ namespace DeepSeekClient.Services
                     messageList.Add(new MessageModel() { role = msg.role, content = msg.content });
                     if (msg.role == "user") { _contextLimit--; }
                 }
+            }, cancelToken);
 
-                if (!string.IsNullOrWhiteSpace(_charSet) && requestModel.model == "deepseek-chat")
+            if (!string.IsNullOrWhiteSpace(_charSet) && requestModel.model == "deepseek-chat")
+            {
+                messageList.Add(new MessageModel()
                 {
-                    messageList.Add(new MessageModel()
-                    {
-                        role = "system",
-                        content = _charSet
-                    });
-                }
+                    role = "system",
+                    content = _charSet
+                });
+            }
 
-                messageList.Reverse();
+            messageList.Reverse();
 
-                requestModel.messages = [.. messageList];
+            requestModel.messages = [.. messageList];
 
-                var request = new HttpRequestMessage(HttpMethod.Post, _uri);
-                request.Headers.Add("Accept", "text/event-stream"); //流式传输
-                request.Headers.Add("Authorization", $"Bearer {_key}");
+            var request = new HttpRequestMessage(HttpMethod.Post, _uri);
+            request.Headers.Add("Accept", "text/event-stream"); //流式传输
+            request.Headers.Add("Authorization", $"Bearer {_key}");
 
-                var requestBody = JsonConvert.SerializeObject(requestModel, _jsonSettings);
+            var requestBody = JsonConvert.SerializeObject(requestModel, _jsonSettings);
 
-                request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                messageList.Clear();
+            request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+            messageList.Clear();
 
-                MessageModel assistantMessage = new() { role = "assistant" };
+            MessageModel assistantMessage = new() { role = "assistant" };
 
-                using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancelToken).ConfigureAwait(false);
+            using HttpResponseMessage response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancelToken);
 
-                response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode();
 
-                using Stream streamContent = await response.Content.ReadAsStreamAsync(cancelToken).ConfigureAwait(false);
-                using StreamReader reader = new(streamContent);
+            using Stream streamContent = await response.Content.ReadAsStreamAsync(cancelToken).ConfigureAwait(false);
+            using StreamReader reader = new(streamContent);
+
+            await Task.Run(() =>
+            {
                 while (!reader.EndOfStream && !cancelToken.IsCancellationRequested)
                 {
-                    var line = await reader.ReadLineAsync(cancelToken).ConfigureAwait(false);
+                    var line = reader.ReadLine();
                     if (string.IsNullOrWhiteSpace(line) || line.StartsWith(": keep-alive")) { continue; }
-                    var objString = line.Substring(5).Trim();
+                    var objString = line[5..].Trim();
                     if (objString.StartsWith("[DONE]")) { break; }
 
                     var obj = JsonConvert.DeserializeObject<ResponseModel>(objString);
@@ -131,57 +137,46 @@ namespace DeepSeekClient.Services
                     if (string.IsNullOrEmpty(tempMessage.content) && string.IsNullOrEmpty(tempMessage.reasoning_content)) { continue; }
 
                     parameters = (tempMessage, _charId);
-                    await Task.Run(() =>
-                    {
-                        _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
-                    }, cancelToken);
-                    await Task.Run(() =>
-                    {
-                        _event.GetEvent<CollectionChangedEvent>().Publish();
-                    }, cancelToken);
+
+                    _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+
+                    _event.GetEvent<CollectionChangedEvent>().Publish();
 
                     assistantMessage.content += tempMessage.content;
                     assistantMessage.reasoning_content += tempMessage.reasoning_content;
                 }
+            }, cancelToken);
 
-                messageList.Add(userMessage);
-                messageList.Add(assistantMessage);
+            messageList.Add(userMessage);
+            messageList.Add(assistantMessage);
 
-                MessageModel stampMessage = new() { role = "stamp", content = DateTime.Now.ToString("g") };
-                messageList.Add(stampMessage);
-                parameters = (stampMessage, _charId);
-                await Task.Run(() =>
+            MessageModel stampMessage = new() { role = "stamp", content = DateTime.Now.ToString("g") };
+            messageList.Add(stampMessage);
+            parameters = (stampMessage, _charId);
+            _ = Task.Run(() =>
+            {
+                _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+                _event.GetEvent<CollectionChangedEvent>().Publish();
+            }, cancelToken);
+
+            if (cancelToken.IsCancellationRequested)
+            {
+                MessageModel stopMessage = new() { role = "stop", content = "## Stop Generating! ##" };
+
+                messageList.Add(stopMessage);
+                messageList.Insert(0, stopMessage);
+
+                parameters = (stopMessage, _charId);
+                _ = Task.Run(() =>
                 {
                     _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
                     _event.GetEvent<CollectionChangedEvent>().Publish();
-                }, cancelToken).ConfigureAwait(false);
-
-                if (cancelToken.IsCancellationRequested)
-                {
-                    MessageModel stopMessage = new() { role = "stop", content = "## Stop Generating! ##" };
-
-                    messageList.Add(stopMessage);
-                    messageList.Insert(0, stopMessage);
-
-                    parameters = (stopMessage, _charId);
-                    await Task.Run(() =>
-                    {
-                        _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
-                        _event.GetEvent<CollectionChangedEvent>().Publish();
-                    }, cancelToken).ConfigureAwait(false);
-                }
-
-                historyMessages.AddRange(messageList);
-
-                await Task.Run(() => _converCore.ConversationSave(new ConversationModel() { Messages = historyMessages }, _charId), cancelToken).ConfigureAwait(false);
+                }, cancelToken);
             }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            finally
-            {
-            }
+
+            historyMessages.AddRange(messageList);
+
+            _ = Task.Run(() => _converCore.ConversationSaveAsync([.. historyMessages], _charId), cancelToken);
         }
 
         private static bool IsValidHttpUrl(string uri)

@@ -20,9 +20,9 @@ namespace DeepSeekClient.Core
             };
         }
 
-        public async Task<List<MessageModel>> ConversationLoad(string charId)
+        public List<MessageModel> ConversationLoad(string charId)
         {
-            await ConversationSaveAsync(charId);
+            ConversationSave(charId);
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
             var jsonString = File.ReadAllText(chatfilePath);
             return JsonConvert.DeserializeObject<List<MessageModel>>(jsonString) ?? [];
@@ -35,20 +35,20 @@ namespace DeepSeekClient.Core
             await File.WriteAllTextAsync(chatfilePath, jsonString);
         }
 
-        public async Task ConversationSaveAsync(string charId)
+        public void ConversationSave(string charId)
         {
             var chatfilePath = Path.Combine(_initial.ChatDir, charId + _initial.ChatFileExt);
 
             if (!File.Exists(chatfilePath))
             {
-                await File.WriteAllTextAsync(chatfilePath, "[]");
+                File.WriteAllText(chatfilePath, "[]");
             }
         }
 
-        public async Task ConversactionClearAsync(string charId)
+        public void ConversactionClear(string charId)
         {
             ConversactionRemove(charId);
-            await ConversationSaveAsync(charId);
+            ConversationSave(charId);
         }
 
         public void ConversactionRemove(string charId)

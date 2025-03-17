@@ -11,6 +11,7 @@ using Prism.Mvvm;
 using Prism.Regions;
 using System;
 using System.Collections.ObjectModel;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -40,7 +41,7 @@ namespace DeepSeekClient.ViewModels
 
         public MainWindowViewModel(IRegionManager regionManager, IService apiService, IEventAggregator eventAggregator, IContainerProvider containerProvider)
         {
-            ClearChatCommand = new DelegateCommand(async () => await ClearChatAsync());
+            ClearChatCommand = new DelegateCommand(ClearChat);
             SendMessageAsyncCommand = new DelegateCommand(async () => await SendMessageAsync());
 
             _event = eventAggregator;
@@ -50,17 +51,17 @@ namespace DeepSeekClient.ViewModels
             _charCore = containerProvider.Resolve<CharacterCore>();
             _converCore = containerProvider.Resolve<ConversationCore>();
 
-            Initialize().Await();
+            Initialize();
             SubscribeToEvents();
 
             regionManager.RegisterViewWithRegion("SideBarRegion", typeof(SideBarView));
         }
 
-        private async Task Initialize()
+        private void Initialize()
         {
             _currentConfig = _configCore.Config;
             _currentChar = _charCore.CharList[0];
-            _currentConversation = [.. await _converCore.ConversationLoad(_currentChar.CharId)];
+            _currentConversation = [.. _converCore.ConversationLoad(_currentChar.CharId)];
             _currentCharName = _currentChar.CharName;
             _allowInput = true;
             _isR1Checked = false;
@@ -78,7 +79,7 @@ namespace DeepSeekClient.ViewModels
             _event.GetEvent<ThemeChangedEvent>().Subscribe(ThemeChangedHandle);
             _event.GetEvent<ConfigurationChangedEvent>().Subscribe(ConfigurationChangedHandle);
             _event.GetEvent<ConversationChangedEvent>().Subscribe(ConversationChangedHandle);
-            _event.GetEvent<ConversationUpdatedEvent>().Subscribe(ConversationUpdatedHandle, ThreadOption.UIThread, keepSubscriberReferenceAlive: true);
+            _event.GetEvent<ConversationUpdatedEvent>().Subscribe(ConversationUpdatedHandle, ThreadOption.UIThread);
         }
 
         private void ConfigurationChangedHandle()
@@ -96,45 +97,59 @@ namespace DeepSeekClient.ViewModels
                     return;
                 }
 
-                if (string.IsNullOrEmpty(_currentConfig.ConfigUri) || string.IsNullOrEmpty(_currentConfig.ConfigKey))
+                if (!ValidateConfiguration())
                 {
-                    MessageBox.Show("Pls fill in the Uri and Key.", "Check!", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show("Pls fill in the Uri and Key.", "CHECK", MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(_inputMessage))
-                {
-                    return;
-                }
+                if (string.IsNullOrWhiteSpace(_inputMessage)) { return; }
 
-                AllowInput = false;
-                StopTag = "Stop";
+                PrepareForSending();
 
-                if (_isR1Checked) { _currentChar.CharModel = "deepseek-reasoner"; } else { _currentChar.CharModel = "deepseek-chat"; }
-
-                await _apiService.SendRequestAsync(_inputMessage, _currentConfig, _currentChar, _cancelTokenSource.Token);
+                await _apiService.SendRequestAsync(_inputMessage, _currentConfig, _currentChar, _cancelTokenSource.Token).ConfigureAwait(false);
 
                 InputMessage = string.Empty;
             }
+            catch (OperationCanceledException)
+            {
+            }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error!", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"error: {ex.Message}", "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
-                StopTag = string.Empty;
-                AllowInput = true;
-
-                _cancelTokenSource.Dispose();
-                _cancelTokenSource = new CancellationTokenSource();
-
-                _event.GetEvent<DoFocusEvent>().Publish();
+                ResetAfterSending();
             }
         }
 
-        private async Task ClearChatAsync()
+        private bool ValidateConfiguration()
         {
-            await _converCore.ConversactionClearAsync(_currentChar.CharId);
+            return !string.IsNullOrEmpty(_currentConfig.ConfigUri) && !string.IsNullOrEmpty(_currentConfig.ConfigKey);
+        }
+
+        private void PrepareForSending()
+        {
+            AllowInput = false;
+            StopTag = "Stop";
+            _currentChar.CharModel = _isR1Checked ? "deepseek-reasoner" : "deepseek-chat";
+        }
+
+        private void ResetAfterSending()
+        {
+            StopTag = string.Empty;
+            AllowInput = true;
+
+            _cancelTokenSource.Dispose();
+            _cancelTokenSource = new CancellationTokenSource();
+
+            _event.GetEvent<DoFocusEvent>().Publish();
+        }
+
+        private void ClearChat()
+        {
+            _converCore.ConversactionClear(_currentChar.CharId);
             CurrentConversation.Clear();
         }
 
@@ -164,7 +179,11 @@ namespace DeepSeekClient.ViewModels
         {
             if (parameters.CharId == _currentChar.CharId)
             {
+                if (parameters.Message.role == "stop_marker" ||
+                    (string.IsNullOrEmpty(parameters.Message.content) && string.IsNullOrEmpty(parameters.Message.reasoning_content))) { return; }
+
                 var lastIndex = _currentConversation.Count - 1;
+
                 if (lastIndex < 0 || _currentConversation[lastIndex].role != parameters.Message.role)
                 {
                     CurrentConversation.Add(parameters.Message); return;
@@ -184,11 +203,11 @@ namespace DeepSeekClient.ViewModels
             }
         }
 
-        private async void ConversationChangedHandle(string charId)
+        private void ConversationChangedHandle(string charId)
         {
             _currentChar = _charCore.CharacterLoad(charId);
             CurrentCharName = _currentChar.CharName;
-            var messages = await _converCore.ConversationLoad(charId);
+            var messages = _converCore.ConversationLoad(charId);
             CurrentConversation = [.. messages];
             _event.GetEvent<CollectionChangedEvent>().Publish();
         }

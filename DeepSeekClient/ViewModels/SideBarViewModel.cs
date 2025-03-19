@@ -38,7 +38,7 @@ namespace DeepSeekClient.ViewModels
             _isVisible = true;
             _currentCharIndex = 0;
 
-            _event.GetEvent<CharacterChangedEvent>().Subscribe(CharacterChangedHandle);
+            _event.GetEvent<CharacterChangedEvent>().Subscribe(CharacterChangedHandle, ThreadOption.UIThread);
         }
 
         private void CharacterChangedHandle(CharacterModel newChar)
@@ -56,6 +56,8 @@ namespace DeepSeekClient.ViewModels
             }
 
             CurrentCharIndex = 0;
+
+            Task.Run(() => _charCore.CharacterSave(newChar));
         }
 
         private void CardOption(string charId)

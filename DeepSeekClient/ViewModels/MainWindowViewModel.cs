@@ -22,7 +22,8 @@ namespace DeepSeekClient.ViewModels
     internal class MainWindowViewModel : BindableBase
     {
         private readonly IEventAggregator _event;
-        private readonly IService _apiService;
+        private readonly IContainerProvider _container;
+        private DeepSeekService _apiService;
 
         private readonly ConfigurationCore _configCore;
         private readonly CharacterCore _charCore;
@@ -39,17 +40,16 @@ namespace DeepSeekClient.ViewModels
         private string _inputMessage;
         private string _stopTag;
 
-        public MainWindowViewModel(IRegionManager regionManager, IService apiService, IEventAggregator eventAggregator, IContainerProvider containerProvider)
+        public MainWindowViewModel(IRegionManager regionManager, IEventAggregator eventAggregator, IContainerProvider containerProvider)
         {
             ClearChatCommand = new DelegateCommand(ClearChat);
             SendMessageAsyncCommand = new DelegateCommand(async () => await SendMessageAsync());
 
             _event = eventAggregator;
-            _apiService = apiService;
-
-            _configCore = containerProvider.Resolve<ConfigurationCore>();
-            _charCore = containerProvider.Resolve<CharacterCore>();
-            _converCore = containerProvider.Resolve<ConversationCore>();
+            _container = containerProvider;
+            _configCore = _container.Resolve<ConfigurationCore>();
+            _charCore = _container.Resolve<CharacterCore>();
+            _converCore = _container.Resolve<ConversationCore>();
 
             Initialize();
             SubscribeToEvents();
@@ -105,9 +105,12 @@ namespace DeepSeekClient.ViewModels
 
                 if (string.IsNullOrWhiteSpace(_inputMessage)) { return; }
 
-                PrepareForSending();
+                AllowInput = false;
+                StopTag = "Stop";
+                _currentChar.CharModel = _isR1Checked ? "deepseek-reasoner" : "deepseek-chat";
+                _apiService = _container.Resolve<DeepSeekService>();
 
-                await _apiService.SendRequestAsync(_inputMessage, _currentConfig, _currentChar, _cancelTokenSource.Token).ConfigureAwait(false);
+                await _apiService.SendRequestAsync(_inputMessage, _currentConfig, _currentChar, _cancelTokenSource.Token);
 
                 InputMessage = string.Empty;
             }
@@ -120,31 +123,20 @@ namespace DeepSeekClient.ViewModels
             }
             finally
             {
-                ResetAfterSending();
+                StopTag = string.Empty;
+                AllowInput = true;
+
+                _apiService?.Dispose();
+                _cancelTokenSource?.Dispose();
+                _cancelTokenSource = new CancellationTokenSource();
+
+                _event.GetEvent<DoFocusEvent>().Publish();
             }
         }
 
         private bool ValidateConfiguration()
         {
             return !string.IsNullOrEmpty(_currentConfig.ConfigUri) && !string.IsNullOrEmpty(_currentConfig.ConfigKey);
-        }
-
-        private void PrepareForSending()
-        {
-            AllowInput = false;
-            StopTag = "Stop";
-            _currentChar.CharModel = _isR1Checked ? "deepseek-reasoner" : "deepseek-chat";
-        }
-
-        private void ResetAfterSending()
-        {
-            StopTag = string.Empty;
-            AllowInput = true;
-
-            _cancelTokenSource.Dispose();
-            _cancelTokenSource = new CancellationTokenSource();
-
-            _event.GetEvent<DoFocusEvent>().Publish();
         }
 
         private void ClearChat()

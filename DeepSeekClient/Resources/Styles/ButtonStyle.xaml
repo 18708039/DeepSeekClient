@@ -50,8 +50,8 @@
                         </Trigger>
                         <Trigger Property="Tag" Value="Stop">
                             <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard RepeatBehavior="Forever" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
+                                <BeginStoryboard x:Name="Storyboard1">
+                                    <Storyboard RepeatBehavior="Forever" FillBehavior="Stop" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)">
                                         <DoubleAnimation Storyboard.TargetName="e1" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerEase1}" AccelerationRatio="0.1" DecelerationRatio="0.9" />
                                         <DoubleAnimation Storyboard.TargetName="e2" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerEase1}" AccelerationRatio="0.3" DecelerationRatio="0.7" />
                                         <DoubleAnimation Storyboard.TargetName="e3" To="360" Duration="0:0:2" EasingFunction="{StaticResource powerEase1}" AccelerationRatio="0.5" DecelerationRatio="0.5" />
@@ -60,6 +60,9 @@
                                     </Storyboard>
                                 </BeginStoryboard>
                             </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="Storyboard1" />
+                            </Trigger.ExitActions>
                             <Setter TargetName="canvas1" Property="Visibility" Value="Visible" />
                             <Setter TargetName="textBlock" Property="Text" Value="&#xedc4;" />
                         </Trigger>

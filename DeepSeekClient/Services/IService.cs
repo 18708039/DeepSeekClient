@@ -2,7 +2,7 @@
 
 namespace DeepSeekClient.Services
 {
-    internal interface IService
+    internal interface IService : IDisposable
     {
         Task SendRequestAsync(string inputContent, ConfigurationModel configuration, CharacterModel character, CancellationToken cancelToken);
     }

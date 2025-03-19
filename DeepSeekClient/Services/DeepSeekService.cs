@@ -60,11 +60,8 @@ namespace DeepSeekClient.Services
 
             var parameters = (userMessage, _charId);
 
-            _ = Task.Run(() =>
-            {
-                _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
-                _event.GetEvent<CollectionChangedEvent>().Publish();
-            }, cancelToken);
+            _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
+            _event.GetEvent<CollectionChangedEvent>().Publish();
 
             messageList.Add(userMessage);
 
@@ -142,7 +139,6 @@ namespace DeepSeekClient.Services
                                     parameters = (tempMessage, _charId);
 
                                     _event.GetEvent<ConversationUpdatedEvent>().Publish(parameters);
-
                                     _event.GetEvent<CollectionChangedEvent>().Publish();
 
                                     assistantMessage.content += tempMessage.content;
@@ -154,6 +150,10 @@ namespace DeepSeekClient.Services
                             messageList.Add(assistantMessage);
 
                             MessageModel stampMessage = new() { role = "stamp", content = DateTime.Now.ToString("g") };
+
+                            character.LastQuestion = userMessage.content.Replace("\n", "").Replace("\r", "");
+                            character.LastStamp = stampMessage.content;
+
                             messageList.Add(stampMessage);
                             parameters = (stampMessage, _charId);
                             _ = Task.Run(() =>
@@ -179,10 +179,12 @@ namespace DeepSeekClient.Services
 
                             historyMessages.AddRange(messageList);
 
-                            _ = Task.Run(() =>
+                            await Task.Run(() =>
                             {
                                 _converCore.ConversationSaveAsync(historyMessages.ToArray(), _charId).Await();
                                 _event.GetEvent<CollectionChangedEvent>().Publish();
+
+                                _event.GetEvent<CharacterChangedEvent>().Publish(character);
                             });
                         }
                     }
@@ -194,6 +196,12 @@ namespace DeepSeekClient.Services
         {
             return Uri.TryCreate(uri, UriKind.Absolute, out Uri? uriResult)
                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+        }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

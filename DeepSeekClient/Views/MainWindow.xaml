@@ -93,6 +93,9 @@
                                 <DataTrigger Binding="{Binding reasoning_content}" Value="">
                                     <Setter TargetName="textBox1" Property="Visibility" Value="Collapsed" />
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding content}" Value="">
+                                    <Setter TargetName="textBox2" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
                                 <DataTrigger Binding="{Binding role}" Value="stop_marker">
                                     <Setter TargetName="textBlock1" Property="Visibility" Value="Collapsed" />
                                     <Setter TargetName="textBlock2" Property="Visibility" Value="Collapsed" />
